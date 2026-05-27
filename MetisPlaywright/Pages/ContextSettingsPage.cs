@@ -20,7 +20,7 @@ namespace MetisPlaywright.Pages
         // footer buttons
         private ILocator CancelBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Cancel']").First;
         private ILocator SetupLaterBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Setup later']").First;
-        private ILocator CreateBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Create']").First;
+        private ILocator CreateBtn => Page.Locator("//div[@role='dialog']//button[contains(normalize-space(),'Create')]").First;
         private ILocator CloseIcon => Page.Locator("//div[@role='dialog']//img[@src='/images/close.svg']").First;
 
         // Configuration tab
@@ -70,6 +70,12 @@ namespace MetisPlaywright.Pages
         public Task ClickCreateAsync() => CreateBtn.ClickAsync();
         public Task ClickCloseAsync() => CloseIcon.ClickAsync();
 
+        public async Task<string> GetCreateBtnTextAsync()
+        {
+            await Expect(CreateBtn).ToBeVisibleAsync();
+            return (await CreateBtn.TextContentAsync()) ?? string.Empty;
+        }
+
         public Task<string> GetContextSettingsTitleAsync() => GetModalTitleTextAsync();
 
         public async Task<ContextSettingsPage> GetContextSettingsPageAutoTests1Async()
@@ -81,6 +87,12 @@ namespace MetisPlaywright.Pages
         // Configuration tab actions
         public Task FillContextTitleAsync(string title) => ContextTitleInput.FillAsync(title);
         public Task FillContextDescriptionAsync(string description) => ContextDescriptionInput.FillAsync(description);
+
+        public async Task<string> GetContextTitleAsync()
+        {
+            await Expect(ContextTitleInput).ToBeVisibleAsync();
+            return await ContextTitleInput.InputValueAsync();
+        }
 
         public async Task<string> GetConfigurationTabMessageAsync()
         {

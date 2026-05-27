@@ -56,7 +56,29 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T04_ContextBuilder_ExistingContext_ClickBackToOverview()
+        public async Task T04_ContextBuilder_ExistingContext_ClickContextSettings()
+        {
+            const string expectedModalTitle = "Context Settings";
+
+            var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+            await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+            await contextOverviewPage.ClickOpenContextBuilderAsync();
+
+            var builderPage = new BuilderPage(Fixture.Page);
+            await builderPage.ExpectOpenedAsync();
+
+            var contextName = (await builderPage.GetNameTextAsync()).Trim();
+            var contextSettingsPage = await builderPage.ClickContextSettingsBtnAsync();
+
+            var actualModalTitle = await contextSettingsPage.GetContextSettingsTitleAsync();
+            actualModalTitle.Trim().Should().Be(expectedModalTitle, "Context Settings modal title is not correct.");
+
+            var actualContextTitle = (await contextSettingsPage.GetContextTitleAsync()).Trim();
+            actualContextTitle.Should().Be(contextName, "Context Title in settings should match the Builder context name.");
+        }
+
+        [Test]
+        public async Task T05_ContextBuilder_ExistingContext_ClickBackToOverview()
         {
             const string expectedOverviewTitle = "Context Overview";
 
@@ -77,6 +99,81 @@ namespace MetisPlaywright.Tests
 
             var actualContextName = (await contextOverviewPage.GetContextNameAsync()).Trim();
             actualContextName.Should().Be(contextName, "Context Overview name should match the name before opening Builder.");
+        }
+
+        [Test]
+        public async Task T06_ContextBuilder_ExistingContext_ClickSaveAsTemplate()
+        {
+            const string expectedModalTitle = "Save as a Template";
+
+            var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+            await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+
+            var contextName = (await contextOverviewPage.GetContextNameAsync()).Trim();
+            var contextDescription = (await contextOverviewPage.GetDescriptionTextAsync()).Trim();
+
+            await contextOverviewPage.ClickOpenContextBuilderAsync();
+
+            var builderPage = new BuilderPage(Fixture.Page);
+            await builderPage.ExpectOpenedAsync();
+            await builderPage.ClickSaveAsTemplateBtnAsync();
+
+            var actualModalTitle = (await builderPage.GetSaveAsTemplateModalTitleAsync()).Trim();
+            actualModalTitle.Should().Be(expectedModalTitle, "Save as a Template modal title is not correct.");
+
+            var actualTemplateName = (await builderPage.GetSaveAsTemplateModalNameAsync()).Trim();
+            actualTemplateName.Should().Be(contextName, "Template Name should match Context Overview name.");
+
+            var actualTemplateDescription = (await builderPage.GetSaveAsTemplateModalDescriptionAsync()).Trim();
+            actualTemplateDescription.Should().Be(contextDescription, "Template Description should match Context Overview description.");
+
+            await builderPage.ExpectSaveAsTemplateModalControlsVisibleAsync();
+        }
+
+        [Test]
+        public async Task T07_ContextBuilder_ExistingContext_ClickBuildContext()
+        {
+            const string expectedOverviewTitle = "Context Overview";
+
+            var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+            await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+
+            var contextName = (await contextOverviewPage.GetContextNameAsync()).Trim();
+            await contextOverviewPage.ClickOpenContextBuilderAsync();
+
+            var builderPage = new BuilderPage(Fixture.Page);
+            await builderPage.ExpectOpenedAsync();
+            await builderPage.ClickBuildContextBtnAsync();
+
+            await contextOverviewPage.ExpectOpenedAsync();
+
+            var actualOverviewTitle = await contextOverviewPage.GetContextOverviewTitleAsync();
+            actualOverviewTitle.Should().Be(expectedOverviewTitle, "Context Overview page title is not correct.");
+
+            var actualContextName = (await contextOverviewPage.GetContextNameAsync()).Trim();
+            actualContextName.Should().Be(contextName, "Context Overview name should match the name before opening Builder.");
+        }
+
+        [Test]
+        public async Task T08_ContextBuilder_ExistingContext_ClickAddChildContext()
+        {
+            const string expectedModalTitle = "Context Settings";
+            const string expectedCreateBtnText = "Create Child";
+
+            var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+            await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+            await contextOverviewPage.ClickOpenContextBuilderAsync();
+
+            var builderPage = new BuilderPage(Fixture.Page);
+            await builderPage.ExpectOpenedAsync();
+
+            var contextSettingsPage = await builderPage.ClickAddChildContextBtnAsync();
+
+            var actualModalTitle = (await contextSettingsPage.GetContextSettingsTitleAsync()).Trim();
+            actualModalTitle.Should().Be(expectedModalTitle, "Context Settings modal title is not correct.");
+
+            var actualCreateBtnText = (await contextSettingsPage.GetCreateBtnTextAsync()).Trim();
+            actualCreateBtnText.Should().Be(expectedCreateBtnText, "Create button text should be 'Create Child' for child context.");
         }
     }
 }

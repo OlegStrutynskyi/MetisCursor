@@ -44,6 +44,63 @@ namespace MetisPlaywright.Pages
         private ILocator FileUploadBtn => Page.Locator(ConstructorButtonXPath("File Upload"));
         private ILocator DropdownBtn => Page.Locator(ConstructorButtonXPath("Dropdown"));
 
+        // Save as template modal
+        private ILocator SaveAsTemplateModal => Page.Locator("//h3[contains(text(),'Save as a Template')]/ancestor::div[contains(@class,'modal-content')]");
+        private ILocator SaveAsTemplateModalTitle => Page.Locator("//div[contains(@class,'modal-content')]//h3");
+        private ILocator SaveAsTemplateModalNameInput => Page.Locator("//label[normalize-space()='Template Name']/following-sibling::div//input");
+        private ILocator SaveAsTemplateModalNameError => Page.Locator("//div[@role='dialog']//label[normalize-space()='Template Name']/following-sibling::div//div[contains(@class,'text-red')]");
+        private ILocator SaveAsTemplateModalDescriptionInput => Page.Locator("//label[normalize-space()='Template Description']/following-sibling::div//textarea");
+        private ILocator SaveAsTemplateModalCancelBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Cancel']").First;
+        private ILocator SaveAsTemplateModalSaveBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Save Template']").First;
+        private ILocator SaveAsTemplateModalCloseIcon => Page.Locator("//div[@role='dialog']//img[@src='/images/close.svg']").First;
+
+        // Save as template modal actions
+        public async Task ClickSaveAsTemplateBtnAsync()
+        {
+            await SaveAsTemplateBtn.ClickAsync();
+            await ExpectSaveAsTemplateModalVisibleAsync();
+        }
+
+        public Task ExpectSaveAsTemplateModalVisibleAsync() =>
+            Expect(SaveAsTemplateModal).ToBeVisibleAsync(new() { Timeout = 15_000 });
+
+        public async Task<string> GetSaveAsTemplateModalTitleAsync()
+        {
+            await Expect(SaveAsTemplateModalTitle).ToBeVisibleAsync();
+            return (await SaveAsTemplateModalTitle.TextContentAsync()) ?? string.Empty;
+        }
+
+        public Task FillSaveAsTemplateModalNameAsync(string name) =>
+            SaveAsTemplateModalNameInput.FillAsync(name);
+
+        public async Task<string> GetSaveAsTemplateModalNameAsync()
+        {
+            await Expect(SaveAsTemplateModalNameInput).ToBeVisibleAsync();
+            return await SaveAsTemplateModalNameInput.InputValueAsync();
+        }
+
+        public async Task<string> GetSaveAsTemplateModalNameErrorAsync()
+        {
+            await Expect(SaveAsTemplateModalNameError).ToBeVisibleAsync();
+            return (await SaveAsTemplateModalNameError.TextContentAsync()) ?? string.Empty;
+        }
+
+        public Task FillSaveAsTemplateModalDescriptionAsync(string description) =>
+            SaveAsTemplateModalDescriptionInput.FillAsync(description);
+
+        public async Task<string> GetSaveAsTemplateModalDescriptionAsync()
+        {
+            await Expect(SaveAsTemplateModalDescriptionInput).ToBeVisibleAsync();
+            return await SaveAsTemplateModalDescriptionInput.InputValueAsync();
+        }
+
+        public Task ExpectSaveAsTemplateModalControlsVisibleAsync() => Task.WhenAll(
+            Expect(SaveAsTemplateModalCancelBtn).ToBeVisibleAsync(),
+            Expect(SaveAsTemplateModalSaveBtn).ToBeVisibleAsync());
+
+        public Task ClickSaveAsTemplateModalCancelAsync() => SaveAsTemplateModalCancelBtn.ClickAsync();
+        public Task ClickSaveAsTemplateModalSaveAsync() => SaveAsTemplateModalSaveBtn.ClickAsync();
+        public Task ClickSaveAsTemplateModalCloseAsync() => SaveAsTemplateModalCloseIcon.ClickAsync();
 
         public async Task<BuilderPage> GetContextBuilderPageAutoTests1Async()
         {
@@ -57,6 +114,22 @@ namespace MetisPlaywright.Pages
         {
             await Expect(CreateNewContextBtn).ToBeEnabledAsync();
             await CreateNewContextBtn.ClickAsync();
+            var contextSettingsPage = new ContextSettingsPage(Page);
+            await contextSettingsPage.ExpectContextSettingsModalVisibleAsync();
+            return contextSettingsPage;
+        }
+
+        public async Task<ContextSettingsPage> ClickContextSettingsBtnAsync()
+        {
+            await ContextSettingsBtn.ClickAsync();
+            var contextSettingsPage = new ContextSettingsPage(Page);
+            await contextSettingsPage.ExpectContextSettingsModalVisibleAsync();
+            return contextSettingsPage;
+        }
+
+        public async Task<ContextSettingsPage> ClickAddChildContextBtnAsync()
+        {
+            await AddChildContextBtn.ClickAsync();
             var contextSettingsPage = new ContextSettingsPage(Page);
             await contextSettingsPage.ExpectContextSettingsModalVisibleAsync();
             return contextSettingsPage;
@@ -120,15 +193,12 @@ namespace MetisPlaywright.Pages
         public ILocator GetArchiveContextBtn() => ArchiveContextBtn;
         public Task ClickArchiveContextBtnAsync() => ArchiveContextBtn.ClickAsync();
         public ILocator GetContextSettingsBtn() => ContextSettingsBtn;
-        public Task ClickContextSettingsBtnAsync() => ContextSettingsBtn.ClickAsync();
         public ILocator GetBackToContextOverviewBtn() => BackToContextOverviewBtn;
         public Task ClickBackToContextOverviewBtnAsync() => BackToContextOverviewBtn.ClickAsync();
         public ILocator GetSaveAsTemplateBtn() => SaveAsTemplateBtn;
-        public Task ClickSaveAsTemplateBtnAsync() => SaveAsTemplateBtn.ClickAsync();
         public ILocator GetBuildContextBtn() => BuildContextBtn;
         public Task ClickBuildContextBtnAsync() => BuildContextBtn.ClickAsync();
         public ILocator GetAddChildContextBtn() => AddChildContextBtn;
-        public Task ClickAddChildContextBtnAsync() => AddChildContextBtn.ClickAsync();
 
         public ILocator GetAddFieldsBtn() => AddFieldsBtn;
         public Task ClickAddFieldsBtnAsync() => AddFieldsBtn.ClickAsync();
