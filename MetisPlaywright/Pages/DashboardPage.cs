@@ -8,7 +8,7 @@ namespace MetisPlaywright.Pages
     {
         public DashboardPage(IPage page) : base(page) { }
 
-        private ILocator DashboardTitle => Page.Locator("//h1[contains(text(),'Dashboard')]").First;
+        private ILocator DashboardTitle => Page.Locator("//h1[contains(text(),' Dashboard')]").First;
         private ILocator TotalCounter => Page.Locator("//div[contains(text(),'Total')]/following-sibling::div/h1");
         private ILocator InProgressCounter => Page.Locator("//div[contains(text(),'In Progress')]/following-sibling::div/h1");
         private ILocator DelayedCounter => Page.Locator("//div[contains(text(),'Delayed')]/following-sibling::div/h1");

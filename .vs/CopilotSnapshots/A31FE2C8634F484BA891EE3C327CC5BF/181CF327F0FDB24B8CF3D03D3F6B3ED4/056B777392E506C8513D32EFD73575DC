@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using MetisPlaywright.Pages;
 using MetisPlaywright.Utils;
 using Microsoft.Playwright;
@@ -162,7 +162,6 @@ namespace MetisPlaywright.Tests
             await assetTypesPage.OpenCreateAssetTypeModalAsync();
             await assetTypesPage.FillAssetTypeSettingsNameAsync(Config.AutoTestsAssetType1);
             await assetTypesPage.ClickAssetTypeSettingsSaveAsync();
-            Thread.Sleep(2000); // Wait for the grid to load
             var assetTypeNames = await assetTypesPage.GetAssetTypeNamesAsync();
             assetTypeNames.Should().Contain(Config.AutoTestsAssetType1, "Newly created Asset Type should be present in the grid.");
         }
@@ -352,7 +351,7 @@ namespace MetisPlaywright.Tests
             await connection.OpenAsync();
 
             await using var command = new NpgsqlCommand(query, connection);
-            command.Parameters.AddWithValue("companyUUID", Guid.Parse(companyUUID));
+            command.Parameters.AddWithValue("companyUUID", companyUUID);
             command.Parameters.AddWithValue("createdAt", new DateTimeOffset(2026, 5, 1, 0, 0, 0, TimeSpan.Zero));
             await command.ExecuteNonQueryAsync();
         }

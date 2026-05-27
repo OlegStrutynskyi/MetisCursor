@@ -64,8 +64,6 @@ namespace MetisPlaywright.Pages
 
         public async Task<int> GetGridTotalRecordsAsync()
         {
-            // The Syncfusion paginator is repainted asynchronously after the grid loads; the
-            // text node may flicker from a stale value before settling, so we let it stabilize.
             await Page.WaitForTimeoutAsync(1000);
             await Expect(GridTotalRecords).ToContainTextAsync("item");
 

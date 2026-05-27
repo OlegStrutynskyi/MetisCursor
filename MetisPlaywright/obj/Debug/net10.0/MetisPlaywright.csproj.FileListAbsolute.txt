@@ -1096,3 +1096,4 @@ d:\Cursor Projects\MetisPlaywright\MetisPlaywright\obj\Debug\net10.0\refint\Meti
 d:\Cursor Projects\MetisPlaywright\MetisPlaywright\obj\Debug\net10.0\MetisPlaywright.pdb
 d:\Cursor Projects\MetisPlaywright\MetisPlaywright\obj\Debug\net10.0\MetisPlaywright.genruntimeconfig.cache
 d:\Cursor Projects\MetisPlaywright\MetisPlaywright\obj\Debug\net10.0\ref\MetisPlaywright.dll
+D:\Cursor Projects\MetisPlaywright\MetisPlaywright\obj\Debug\net10.0\MetisPlaywright.sourcelink.json

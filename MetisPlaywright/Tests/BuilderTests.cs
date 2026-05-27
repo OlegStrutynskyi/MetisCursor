@@ -44,7 +44,7 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T03_ContextBuilder_ExistingContext()
+        public async Task T03_ContextBuilder_ExistingContext_View()
         {
             var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
             await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
@@ -53,6 +53,30 @@ namespace MetisPlaywright.Tests
             var builderPage = new BuilderPage(Fixture.Page);
             await builderPage.ExpectOpenedAsync();
             await builderPage.ExpectExistingContextControlsVisibleAsync();
+        }
+
+        [Test]
+        public async Task T04_ContextBuilder_ExistingContext_ClickBackToOverview()
+        {
+            const string expectedOverviewTitle = "Context Overview";
+
+            var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+            await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+
+            var contextName = (await contextOverviewPage.GetContextNameAsync()).Trim();
+            await contextOverviewPage.ClickOpenContextBuilderAsync();
+
+            var builderPage = new BuilderPage(Fixture.Page);
+            await builderPage.ExpectOpenedAsync();
+            await builderPage.ClickBackToContextOverviewBtnAsync();
+
+            await contextOverviewPage.ExpectOpenedAsync();
+
+            var actualOverviewTitle = await contextOverviewPage.GetContextOverviewTitleAsync();
+            actualOverviewTitle.Should().Be(expectedOverviewTitle, "Context Overview page title is not correct.");
+
+            var actualContextName = (await contextOverviewPage.GetContextNameAsync()).Trim();
+            actualContextName.Should().Be(contextName, "Context Overview name should match the name before opening Builder.");
         }
     }
 }

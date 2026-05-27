@@ -33,10 +33,6 @@ namespace MetisPlaywright.Utils
                 "MATCH (n) WHERE n.DisplayName = $displayName DETACH DELETE n",
                 new { displayName });
 
-        /// <summary>
-        /// Label-agnostic delete by Name. Used when a single test produces several node kinds
-        /// (e.g. Person + Company) all keyed on Name and we need to purge by fixture value.
-        /// </summary>
         public Task DeleteNodeByNameAsync(string name) =>
             ExecuteAsync(
                 "MATCH (n {Name: $name}) DETACH DELETE n",
