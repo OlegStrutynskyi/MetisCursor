@@ -1,0 +1,74 @@
+﻿using System.Threading.Tasks;
+using NUnit.Framework;
+using MetisPlaywright.Pages;
+using MetisPlaywright.Utils;
+using FluentAssertions;
+
+namespace MetisPlaywright.Tests
+{
+    public class LoginPageTest : BaseTest
+    {
+        [Test]
+        public async Task T01_LoginPage_DefaultView()
+        {
+            string expectedTitle = "Login";
+            string expectedMessage = "Welcome back! Please enter your details.";
+            string expectedEmailPlaceholder = "Enter your email";
+            string expectedPasswordPlaceholder = "Enter your password";
+
+            await Fixture.Page.GotoAsync(Config.BaseUrl);
+            var loginPage = new LoginPage(Fixture.Page);
+            var actualTitle = await loginPage.GetLoginPageTitle();
+            var actualMessage = await loginPage.GetLoginPageMessage();
+            var emailInput = loginPage.GetEmailInput();
+            var actualEmailPlaceholder = await loginPage.GetEmailPlaceholder();
+            var passwordInput = loginPage.GetPasswordInput();
+            var actualPasswordPlaceholder = await loginPage.GetPasswordPlaceholder();
+            var rememberCheckbox = loginPage.GetRememberCheckbox();
+            var forgotPasswordLink = loginPage.GetForgotPasswordLink();
+            var loginButton = loginPage.GetLoginBtn();
+
+            actualTitle.Should().Be(expectedTitle, "Login page title is not correct.");
+            actualMessage.Should().Be(expectedMessage, "Login page message is not correct.");
+            (await emailInput.IsVisibleAsync()).Should().BeTrue("Email input field is not visible.");
+            actualEmailPlaceholder.Should().Be(expectedEmailPlaceholder, "Email placeholder text is not correct.");
+            (await passwordInput.IsVisibleAsync()).Should().BeTrue("Password input field is not visible.");
+            actualPasswordPlaceholder.Should().Be(expectedPasswordPlaceholder, "Password placeholder text is not correct.");
+            (await rememberCheckbox.IsVisibleAsync()).Should().BeTrue("'Remember me' checkbox is not visible.");
+            (await forgotPasswordLink.IsVisibleAsync()).Should().BeTrue("Forgot password link is not visible.");
+            (await loginButton.IsVisibleAsync()).Should().BeTrue("Login button is not visible.");
+        }
+
+        [Test]
+        public async Task T02_LoginPage_EmptyFields()
+        {
+            var expectedEmailError = "Email is required.";
+            var expectedPasswordError = "Password is required.";
+
+            await Fixture.Page.GotoAsync(Config.BaseUrl);
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.ClickLoginBtn();
+
+            var actualEmailError = await loginPage.GetEmailErrorMessage();
+            var actualPasswordError = await loginPage.GetPasswordErrorMessage();
+
+            actualEmailError.Should().Be(expectedEmailError, "Email error should match the expected message when the email field is empty.");
+            actualPasswordError.Should().Be(expectedPasswordError, "Password error should match the expected message when the password field is empty.");
+        }
+
+        [Test]
+        public async Task T03_LoginPage_InvalidEmail()
+        {
+            var expectedInvalidEmailError = "'Email' is not a valid email address.";
+
+            await Fixture.Page.GotoAsync(Config.BaseUrl);
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetEmailInput().FillAsync("invalid.com");
+            await loginPage.ClickLoginBtn();
+
+            var actualEmailError = await loginPage.GetEmailErrorMessage();
+            actualEmailError.Should().Be(expectedInvalidEmailError, "An invalid email should show the correct validation message.");
+        }
+
+    }
+}

@@ -1,0 +1,30 @@
+﻿using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using System.Threading.Tasks;
+
+namespace MetisPlaywright.Pages
+{
+    public class DashboardPage : BasePage
+    {
+        public DashboardPage(IPage page) : base(page) { }
+
+        private ILocator DashboardTitle => Page.Locator("//h1[contains(text(),'Welcome')]").First;
+
+
+        
+        public async Task GetDashboardPage()
+        {
+            var baseUrl = Config.BaseUrl;
+            var dashboardUrl = baseUrl.EndsWith("/login") ? baseUrl.Replace("/login", "/") : baseUrl;
+            await Page.GotoAsync(dashboardUrl);
+            await DashboardTitle.WaitForAsync();
+        }
+
+        public async Task<string> GetDashboardTitle()
+        {
+            return (await DashboardTitle.TextContentAsync()) ?? string.Empty;
+        }
+
+        
+    }
+}

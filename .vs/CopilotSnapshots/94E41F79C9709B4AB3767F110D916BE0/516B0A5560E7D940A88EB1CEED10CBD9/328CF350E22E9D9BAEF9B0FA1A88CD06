@@ -1,0 +1,54 @@
+﻿using FluentAssertions;
+using MetisPlaywright.Pages;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace MetisPlaywright.Tests
+{
+    public class CustomerAccountsTests : BaseTest
+    {
+        [Test]
+        public async Task T01_CustomerAccounts_DefaultView()
+        {
+            string expectedTitle = "Customer Accounts";
+
+            var customerAccountsPage = new CustomerAccountsPage(Fixture.Page);
+            await customerAccountsPage.GetCustomerAccountsPage();
+            var actualTitle = await customerAccountsPage.GetPageTitle();
+            actualTitle.Should().Be(expectedTitle, "Customer Accounts page title is not correct.");
+        }
+        
+        /*just to check if the test is working, will be rewritten later to create a new customer and check if it is the last one in the grid
+        [Test]
+        public async Task T02_CustomerAccounts_GetLastCustomer()
+        {
+            string expectedLastCustomer = "Customer 1";
+
+            var customerAccountsPage = new CustomerAccountsPage(Fixture.Page);
+            await customerAccountsPage.GetCustomerAccountsPage();
+            var actualLastCustomer = await customerAccountsPage.GetLastCustomer();
+            actualLastCustomer.Should().Be(expectedLastCustomer, "The last customer is not correct.");
+        }*/
+
+        [Test]
+        public async Task T02_CustomerAccounts_EmptyGrid()
+        {
+            string expectedMessage = "No customer records";
+            
+            var customerAccountsPage = new CustomerAccountsPage(Fixture.Page);
+            await customerAccountsPage.GetCustomerAccountsPage();
+            var actualMessage = await customerAccountsPage.GetGridEmptyMessage();
+            actualMessage.Should().Be(expectedMessage, "The empty grid message is not correct.");
+        }
+        [Test]
+        public async Task T03_CustomerAccounts_NotEmptyGrid()
+        {
+            var customerAccountsPage = new CustomerAccountsPage(Fixture.Page);
+            await customerAccountsPage.GetCustomerAccountsPageAutoTests1();
+            var names = await customerAccountsPage.GetAllGridCustomerNames();
+            names.Count.Should().BeGreaterThan(0, "The customer grid should contain at least one customer");
+        }
+
+    }
+}

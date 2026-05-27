@@ -1,0 +1,70 @@
+﻿using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using System.Threading.Tasks;
+
+namespace MetisPlaywright.Pages
+{
+    public class LeftMenuPage : BasePage
+    {
+        public LeftMenuPage(IPage page) : base(page) { }
+
+        private ILocator DashboardIcon => Page.Locator("//div[@title='Dashboard']/img");
+        private ILocator ReportsIcon => Page.Locator("//div[@title='Reports']/img");
+        private ILocator ContextExplorerIcon => Page.Locator("//div[@title='Context Explorer']/img");
+        private ILocator LabelsIcon => Page.Locator("//div[@title='Labels Overview']/img");
+        private ILocator TemplatesIcon => Page.Locator("//div[@title='Templates']/img");
+        private ILocator ResourceManagerIcon => Page.Locator("//div[@title='Resource Manager']/img");
+        private ILocator OptimizationsIcon => Page.Locator("//div[@title='Optimizations']/img");
+        private ILocator PeopleIcon => Page.Locator("//div[@title='People']/img");
+        private ILocator CustomerAccountsIcon => Page.Locator("//div[@title='Customer Accounts']/img");
+        private ILocator StartOptimizationIcon => Page.Locator("//div[@title='Start Optimization']/img");
+        private ILocator SupportIcon => Page.Locator("//div[@title='Support']/img");
+        private ILocator SettingsIcon => Page.Locator("//div[@title='Settings']/img");
+        private ILocator LogOutIcon => Page.Locator("//div[contains(@class,'logout-icon')]/img");
+
+        
+        public async Task GetLeftMenuPage()
+        {
+            var dashboardPage = new DashboardPage(Page);
+            await dashboardPage.GetDashboardPage();
+        }
+        public ILocator GetDashboardIcon() => DashboardIcon;        
+        public async Task ClickDashboardIcon() => await DashboardIcon.ClickAsync();
+        public ILocator GetReportsIcon() => ReportsIcon;
+        public async Task ClickReportsIcon()
+        {
+            await ReportsIcon.ClickAsync();
+            await Page.WaitForURLAsync(url => url.Contains("reports"));
+        }
+        public ILocator GetContextExplorerIcon() => ContextExplorerIcon;
+        public async Task ClickContextExplorerIcon()
+        {
+            await ContextExplorerIcon.ClickAsync();
+            await Page.WaitForURLAsync(url => url.Contains("contexts"));
+        }
+        public ILocator GetLabelsIcon() => LabelsIcon;
+        public async Task ClickLabelsIcon()
+        {
+            await LabelsIcon.ClickAsync();
+            await Page.WaitForURLAsync(url => url.Contains("labels"));
+        }
+        public ILocator GetTemplatesIcon() => TemplatesIcon;
+        public async Task ClickTemplatesIcon() => await TemplatesIcon.ClickAsync();
+        public ILocator GetResourceManagerIcon() => ResourceManagerIcon;
+        public async Task ClickResourceManagerIcon() => await ResourceManagerIcon.ClickAsync();
+        public ILocator GetOptimizationsIcon() => OptimizationsIcon;
+        public async Task ClickOptimizationsIcon() => await OptimizationsIcon.ClickAsync();
+        public ILocator GetPeopleIcon() => PeopleIcon;
+        public async Task ClickPeopleIcon() => await PeopleIcon.ClickAsync();
+        public ILocator GetCustomerAccountsIcon() => CustomerAccountsIcon;
+        public async Task ClickCustomerAccountsIcon() => await CustomerAccountsIcon.ClickAsync();
+        public ILocator GetStartOptimizationIcon() => StartOptimizationIcon;
+        public async Task ClickStartOptimizationIcon() => await StartOptimizationIcon.ClickAsync();
+        public ILocator GetSupportIcon() => SupportIcon;
+        public async Task ClickSupportIcon() => await SupportIcon.ClickAsync();
+        public ILocator GetSettingsIcon() => SettingsIcon;
+        public async Task ClickSettingsIcon() => await SettingsIcon.ClickAsync();
+        public ILocator GetLogOutIcon() => LogOutIcon;
+        public async Task ClickLogOutIcon() => await LogOutIcon.ClickAsync();
+    }
+}

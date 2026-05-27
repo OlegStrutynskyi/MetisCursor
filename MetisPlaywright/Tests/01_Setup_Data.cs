@@ -1,0 +1,359 @@
+using FluentAssertions;
+using MetisPlaywright.Pages;
+using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using Npgsql;
+
+namespace MetisPlaywright.Tests
+{
+    public class _01_Setup_Data : BaseTest
+    {
+        // This class is intended for setting up any necessary data before running the tests for the very first time.
+        // Each test method should be executed only once to create the required data, such as users, companies, etc., that will be used in subsequent tests.
+        // These tests are explicit because they create persistent setup data and should only be run manually.
+
+
+        [Test, Explicit("Run manually for one-time setup only.")]
+        public async Task T01_Setup_AutoTestsUserAndCompany()
+        {
+            var mailboxUrl = $"https://app.endtest.io/mailbox?email={Config.CorrectEmailAutoTests1}";
+            var expectedDashboardTitle = $"{Config.DefaultCoreLabel}s Dashboard";
+
+            var createCompanyPage = new CreateCompanyPage(Fixture.Page);
+            //create new company and user via API
+            var requestContext = await createCompanyPage.CreateRequestContextAsync();
+            var response = await requestContext.PostAsync("setup", new APIRequestContextOptions
+            {
+                DataObject = new
+                {
+                    user = new
+                    {
+                        email = $"{Config.CorrectEmailAutoTests1}",
+                        firstName = $"{Config.AutoTests1FirstName}",
+                        lastName = $"{Config.AutoTests1LastName}",
+                        status = 1
+                    },
+                    company = new
+                    {
+                        name = $"{Config.AutoTests1Company}",
+                        coreLabel = $"{Config.DefaultCoreLabel}"
+                    }
+                }
+            });
+
+            //verify Response status code
+            var statusCode = response.Status;
+            statusCode.Should().Be(202, "Creating a new company with valid data should return status code 202 Accepted.");
+
+            //navigate to mailbox and click on the link to set password for the new user
+            Thread.Sleep(5000); //wait for the email to arrive in the mailbox          
+            await Fixture.Page.GotoAsync(mailboxUrl);
+            await createCompanyPage.ClickFinishLinkAsync();
+            var setupLink = await createCompanyPage.GetFinishSetupLinkAsync();
+            await Fixture.Page.GotoAsync(setupLink);
+
+            //set a password for the new user
+            var createPasswordPage = new CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.FillPasswordAsync(Config.CorrectPassword);
+            await createPasswordPage.FillConfirmPasswordAsync(Config.CorrectPassword);
+            await createPasswordPage.ClickSetPasswordAsync();
+
+            //assert that the user can log in successfully with the new credentials
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.FillEmailAsync(Config.CorrectEmailAutoTests1);
+            await loginPage.FillPasswordAsync(Config.CorrectPassword);
+            await loginPage.ClickLoginAsync();
+
+            var dashboardPage = new DashboardPage(Fixture.Page);
+            var actualDashboardTitle = await dashboardPage.GetDashboardTitleAsync();
+            actualDashboardTitle.Should().Be(expectedDashboardTitle, "Logging in with correct credentials should navigate to the Dashboard page.");
+
+            //delete company and user from database
+            //await new PostgresRepository().DeleteCompanyByAdminEmailAsync(Config.CorrectEmailAutoTests1);
+            //await new Neo4jRepository().DeleteNodeByNameAsync(Config.CorrectEmailAutoTests1);
+        }
+
+        [Test, Explicit("Run manually for one-time setup only.")]
+        public async Task T02_Setup_ActivateOptimization()
+        {
+            //Get company UUID from database
+            var companyUUID = await GetCompanyUUIDFromPostgreSQL(Config.CorrectEmailAutoTests1);
+
+            //Activate optimization for the company via database update
+            await ActivateOptimizationForAutoTestsCompany(companyUUID);
+
+        }
+
+        [Test, Explicit("Run manually for one-time setup only.")]
+        public async Task T03_Setup_Empty_AutoTestsUserAndCompany()
+        {
+            var mailboxUrl = $"https://app.endtest.io/mailbox?email={Config.CorrectEmailEmptyAutoTests1}";
+            var expectedDashboardTitle = $"{Config.DefaultCoreLabel}s Dashboard";
+
+            var createCompanyPage = new CreateCompanyPage(Fixture.Page);
+            //create new company and user via API
+            var requestContext = await createCompanyPage.CreateRequestContextAsync();
+            var response = await requestContext.PostAsync("setup", new APIRequestContextOptions
+            {
+                DataObject = new
+                {
+                    user = new
+                    {
+                        email = $"{Config.CorrectEmailEmptyAutoTests1}",
+                        firstName = $"{Config.AutoTestsEmptyFirstName}",
+                        lastName = $"{Config.AutoTestsEmptyLastName}",
+                        status = 1
+                    },
+                    company = new
+                    {
+                        name = $"{Config.AutoTestsEmptyCompany}",
+                        coreLabel = $"{Config.DefaultCoreLabel}"
+                    }
+                }
+            });
+
+            //verify Response status code
+            var statusCode = response.Status;
+            statusCode.Should().Be(202, "Creating a new company with valid data should return status code 202 Accepted.");
+
+            //navigate to mailbox and click on the link to set password for the new user
+            Thread.Sleep(5000); //wait for the email to arrive in the mailbox          
+            await Fixture.Page.GotoAsync(mailboxUrl);
+            await createCompanyPage.ClickFinishLinkAsync();
+            var setupLink = await createCompanyPage.GetFinishSetupLinkAsync();
+            await Fixture.Page.GotoAsync(setupLink);
+
+            //set a password for the new user
+            var createPasswordPage = new CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.FillPasswordAsync(Config.CorrectPassword);
+            await createPasswordPage.FillConfirmPasswordAsync(Config.CorrectPassword);
+            await createPasswordPage.ClickSetPasswordAsync();
+
+            //assert that the user can log in successfully with the new credentials
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.FillEmailAsync(Config.CorrectEmailEmptyAutoTests1);
+            await loginPage.FillPasswordAsync(Config.CorrectPassword);
+            await loginPage.ClickLoginAsync();
+
+            var dashboardPage = new DashboardPage(Fixture.Page);
+            var actualDashboardTitle = await dashboardPage.GetDashboardTitleAsync();
+            actualDashboardTitle.Should().Be(expectedDashboardTitle, "Logging in with correct credentials should navigate to the Dashboard page.");
+
+            //delete company and user from database
+            //await new PostgresRepository().DeleteCompanyByAdminEmailAsync(Config.CorrectEmailEmptyAutoTests1);
+            //await new Neo4jRepository().DeleteNodeByNameAsync(Config.CorrectEmailEmptyAutoTests1);
+        }
+
+        [Test, Explicit("Run manually for one-time setup only.")]
+        public async Task T04_Setup_Empty_ActivateOptimization()
+        {
+            //Get company UUID from database
+            var companyUUID = await GetCompanyUUIDFromPostgreSQL(Config.CorrectEmailEmptyAutoTests1);
+
+            //Activate optimization for the company via database update
+            await ActivateOptimizationForAutoTestsCompany(companyUUID);
+        }
+
+        [Test, Explicit("Run manually for one-time setup only.")]
+        public async Task T05_Setup_CreateAssetType_AutoTests1()
+        {
+            var assetTypesPage = new AssetTypesPage(Fixture.Page);
+            await assetTypesPage.OpenForAutoTests1Async();
+            await assetTypesPage.OpenCreateAssetTypeModalAsync();
+            await assetTypesPage.FillAssetTypeSettingsNameAsync(Config.AutoTestsAssetType1);
+            await assetTypesPage.ClickAssetTypeSettingsSaveAsync();
+            var assetTypeNames = await assetTypesPage.GetAssetTypeNamesAsync();
+            assetTypeNames.Should().Contain(Config.AutoTestsAssetType1, "Newly created Asset Type should be present in the grid.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only.")]
+        public async Task T06_Setup_CreateCustomer_AutoTests1()
+        {
+            var customerAccountsPage = new CustomerAccountsPage(Fixture.Page);
+            await customerAccountsPage.OpenForAutoTests1Async();
+            Thread.Sleep(2000); // Wait for the grid to load and display the correct customer count
+            var companyDetailsPage = await customerAccountsPage.ClickCreateCustomerAccountBtnAsync();
+            await companyDetailsPage.FillCustomerNameAsync(Config.AutoTestsCustomer1);
+            await companyDetailsPage.SelectRandomIndustryOptionAsync();
+            await companyDetailsPage.ClickSaveAsync();
+            var customerAccountsPage2 = new CustomerAccountsPage(Fixture.Page);
+            Thread.Sleep(2000); // Wait for the grid to load and display the correct customer count
+            var customerNames = await customerAccountsPage2.GetCustomerNamesAsync();
+            customerNames.Should().Contain(Config.AutoTestsCustomer1, "The new customer should be in the grid");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only.")]
+        public async Task T07_Setup_CreateContext_AutoTests1()
+        {
+            var contextExplorerPage = new ContextExplorerPage(Fixture.Page);
+            await contextExplorerPage.OpenForAutoTests1Async();
+            var builderPage = await contextExplorerPage.ClickCreateNewContextBtnAsync();
+            var contextSettingsPage = await builderPage.ClickCreateNewContextBtnAsync();
+            await contextSettingsPage.FillContextTitleAsync(Config.AutoTestsContext1);
+            await contextSettingsPage.FillContextDescriptionAsync(Config.AutoTestsContext1Description);
+            await contextSettingsPage.SelectCustomerAccountRandomlyAsync();
+            await contextSettingsPage.ClickLabelsTabAsync();
+            await contextSettingsPage.SelectJobLabelAsync();
+            await contextSettingsPage.ClickCreateAsync();
+            var leftmenuPage = new LeftMenuPage(Fixture.Page);
+            await leftmenuPage.ClickContextExplorerIconAsync();
+            var contextExplorerPage2 = new ContextExplorerPage(Fixture.Page);
+            var contextNames = await contextExplorerPage2.GetContextNamesAsync();
+            contextNames.Should().Contain(Config.AutoTestsContext1, "Newly created Context should be present in the grid.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Leaves the Skill in the tenant; asserts it appears in the grid.")]
+        public async Task T08_Setup_CreateSkill_AutoTests1()
+        {
+            var resourceManagerPage = new ResourceManagerPage(Fixture.Page);
+            await resourceManagerPage.OpenForAutoTests1Async();
+
+            await resourceManagerPage.ClickCreateResourceBtnAsync();
+            await resourceManagerPage.FillResourceSettingsNameAsync(Config.AutoTestsSkill1);
+            await resourceManagerPage.SelectResourceTypeAsync("Skill");
+            await resourceManagerPage.ClickResourceSettingsSaveAsync();
+
+            var names = await resourceManagerPage.GetResourceNamesAsync();
+            names.Should().Contain(Config.AutoTestsSkill1, "Newly created Skill should be present in the grid.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Leaves the Credential in the tenant; asserts it appears in the grid.")]
+        public async Task T09_Setup_CreateCredential_AutoTests1()
+        {
+            var resourceManagerPage = new ResourceManagerPage(Fixture.Page);
+            await resourceManagerPage.OpenForAutoTests1Async();
+
+            await resourceManagerPage.ClickCreateResourceBtnAsync();
+            await resourceManagerPage.FillResourceSettingsNameAsync(Config.AutoTestsCredential1);
+            await resourceManagerPage.SelectResourceTypeAsync("Credential");
+            await resourceManagerPage.ClickResourceSettingsSaveAsync();
+
+            var names = await resourceManagerPage.GetResourceNamesAsync();
+            names.Should().Contain(Config.AutoTestsCredential1, "Newly created Credential should be present in the grid.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Leaves the Knowledge resource in the tenant; asserts it appears in the grid.")]
+        public async Task T10_Setup_CreateKnowledge_AutoTests1()
+        {
+            var resourceManagerPage = new ResourceManagerPage(Fixture.Page);
+            await resourceManagerPage.OpenForAutoTests1Async();
+
+            await resourceManagerPage.ClickCreateResourceBtnAsync();
+            await resourceManagerPage.FillResourceSettingsNameAsync(Config.AutoTestsKnowledge1);
+            await resourceManagerPage.SelectResourceTypeAsync("Knowledge");
+            await resourceManagerPage.ClickResourceSettingsSaveAsync();
+
+            var names = await resourceManagerPage.GetResourceNamesAsync();
+            names.Should().Contain(Config.AutoTestsKnowledge1, "Newly created Knowledge should be present in the grid.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Leaves the Asset in the tenant; asserts it appears in the grid.")]
+        public async Task T11_Setup_CreateAsset_AutoTests1()
+        {
+            var resourceManagerPage = new ResourceManagerPage(Fixture.Page);
+            await resourceManagerPage.OpenForAutoTests1Async();
+
+            await resourceManagerPage.ClickCreateResourceBtnAsync();
+            await resourceManagerPage.FillResourceSettingsNameAsync(Config.AutoTestsAsset1);
+            await resourceManagerPage.SelectResourceTypeAsync("Asset");
+            await resourceManagerPage.SelectAssetTypeAsync(Config.AutoTestsAssetType1);
+            await resourceManagerPage.ClickResourceSettingsSaveAsync();
+
+            var names = await resourceManagerPage.GetResourceNamesAsync();
+            names.Should().Contain(Config.AutoTestsAsset1, "Newly created Asset should be present in the grid.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Leaves the Consumable in the tenant; asserts it appears in the grid.")]
+        public async Task T12_Setup_CreateConsumable_AutoTests1()
+        {
+            var resourceManagerPage = new ResourceManagerPage(Fixture.Page);
+            await resourceManagerPage.OpenForAutoTests1Async();
+
+            await resourceManagerPage.ClickCreateResourceBtnAsync();
+            await resourceManagerPage.FillResourceSettingsNameAsync(Config.AutoTestsConsumable1);
+            await resourceManagerPage.SelectResourceTypeAsync("Consumable");
+            await resourceManagerPage.FillResourceSettingsVolumeAsync(Config.AutoTestsConsumableVolume);
+            await resourceManagerPage.SelectUnitOfMeasureAsync(Config.AutoTestsConsumableUnitOfMeasure);
+            await resourceManagerPage.ClickResourceSettingsSaveAsync();
+
+            var names = await resourceManagerPage.GetResourceNamesAsync();
+            names.Should().Contain(Config.AutoTestsConsumable1, "Newly created Consumable should be present in the grid.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Creates Skill, sets IsArchived=true in Neo4j; asserts name on Archived tab.")]
+        public async Task T13_Setup_CreateSkill2Archived_AutoTests1()
+        {
+            var resourceManagerPage = new ResourceManagerPage(Fixture.Page);
+            await resourceManagerPage.OpenForAutoTests1Async();
+
+            await resourceManagerPage.ClickCreateResourceBtnAsync();
+            await resourceManagerPage.FillResourceSettingsNameAsync(Config.AutoTestsSkill2Archived);
+            await resourceManagerPage.SelectResourceTypeAsync("Skill");
+            await resourceManagerPage.ClickResourceSettingsSaveAsync();
+
+            var neo4jRepo = new Neo4jRepository();
+            await neo4jRepo.SetResourceArchivedByNameAsync(Config.AutoTestsSkill2Archived);
+
+            await resourceManagerPage.ClickArchivedTabAsync();
+            var names = await resourceManagerPage.GetResourceNamesAsync();
+            names.Should().Contain(Config.AutoTestsSkill2Archived, "Archived Skill should appear on the Archived tab.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Creates AutoTests2 person in AutoTests1 tenant; asserts name in People grid.")]
+        public async Task T14_Setup_CreatePerson_AutoTests2()
+        {
+            var peoplePage = new PeoplePage(Fixture.Page);
+            await peoplePage.OpenForAutoTests1Async();
+            await peoplePage.OpenPersonSettingsModalAsync();
+            await peoplePage.FillPersonSettingsFirstNameAsync(Config.AutoTests2FirstName);
+            await peoplePage.FillPersonSettingsLastNameAsync(Config.AutoTests2LastName);
+            await peoplePage.FillPersonSettingsEmailAsync(Config.CorrectEmailAutoTests2);
+            await peoplePage.ClickPersonSettingsSaveAsync();
+
+            var expectedPersonName = $"{Config.AutoTests2FirstName} {Config.AutoTests2LastName}";
+            IReadOnlyList<string> personNames = [];
+            for (var attempt = 0; attempt < 15; attempt++)
+            {
+                personNames = await peoplePage.GetPersonNamesAsync();
+                if (personNames.Any(n => string.Equals(n.Trim(), expectedPersonName, StringComparison.Ordinal)))
+                    break;
+                await Fixture.Page.WaitForTimeoutAsync(500);
+            }
+
+            personNames.Should().Contain(n => string.Equals(n.Trim(), expectedPersonName, StringComparison.Ordinal),
+                "AutoTests2 person should appear in the People grid name list.");
+        }
+
+
+
+
+
+        public async Task<string> GetCompanyUUIDFromPostgreSQL(string email)
+        {
+            const string query = "SELECT \"CompanyId\" FROM public.\"Companies\" WHERE \"SystemAdminEmail\" = @email";
+            await using var connection = new NpgsqlConnection(Config.PostgreSqlConnectionStringTest);
+            await connection.OpenAsync();
+
+            await using var command = new NpgsqlCommand(query, connection);
+            command.Parameters.AddWithValue("email", email);
+
+            var result = await command.ExecuteScalarAsync();
+            return result?.ToString() ?? string.Empty;
+        }
+        public async Task ActivateOptimizationForAutoTestsCompany(string companyUUID)
+        {
+            const string query = """
+                INSERT INTO public."CompanyFeatureFlags"
+                VALUES (@companyUUID, @companyUUID, 'optimization_feature', TRUE, @createdAt, NULL);
+                """;
+
+            await using var connection = new NpgsqlConnection(Config.PostgreSqlConnectionStringTest);
+            await connection.OpenAsync();
+
+            await using var command = new NpgsqlCommand(query, connection);
+            command.Parameters.AddWithValue("companyUUID", companyUUID);
+            command.Parameters.AddWithValue("createdAt", new DateTimeOffset(2026, 5, 1, 0, 0, 0, TimeSpan.FromHours(2)));
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+}

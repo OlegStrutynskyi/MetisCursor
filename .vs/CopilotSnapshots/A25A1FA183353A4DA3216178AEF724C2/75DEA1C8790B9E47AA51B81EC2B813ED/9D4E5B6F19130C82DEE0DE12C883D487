@@ -1,0 +1,134 @@
+﻿using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using Neo4j.Driver;
+using System.Threading.Tasks;
+using static Microsoft.Playwright.Assertions;
+using Config = MetisPlaywright.Utils.Config;
+
+
+namespace MetisPlaywright.Pages
+{
+    public class ContextExplorerPage : BasePage
+    {
+        public ContextExplorerPage(IPage page) : base(page) { }
+
+        private ILocator CreateNewContextBtn => Page.Locator("//button[normalize-space()='Create New Context']");
+        private ILocator CreateNewCustomerAccountBtn => Page.Locator("//button[normalize-space()='Create New Customer Account']");
+        private ILocator LabelFilter => Page.Locator("//input[@placeholder='Select label']");
+        private ILocator LabelFilterArrow => Page.Locator("//input[@placeholder='Select label']/following-sibling::span[contains(@class,'e-icons')]");
+        private ILocator LabelFilterOption => Page.Locator("//li[contains(@class,'e-list-item')]");
+        private ILocator AccountFilter => Page.Locator("//input[@placeholder='Account']");
+        private ILocator DateRangeFilter => Page.Locator("//input[@placeholder='Date range']");
+        private ILocator ColumnsBtn => Page.Locator("//button[normalize-space()='Columns']");
+
+        //grid
+        private ILocator GridEmptyMessage => Page.Locator("//div[contains(@class,'justify-center text-sm')]");
+        private ILocator GridContextName => Page.Locator("//tr/td[2]//span[contains(@class,'text-sm')]");
+
+
+        
+
+
+        public async Task GetContextExplorerPageAutoTests1()
+        {
+            var leftMenu = new LeftMenuPage(Page);
+            await leftMenu.GetLeftMenuPageAutoTests1();
+            await leftMenu.ClickContextExplorerIcon();
+            await GetPageTitleLocator().WaitForAsync();
+            await Expect(GetPageTitleLocator()).ToHaveTextAsync("Contexts");
+        }
+        public async Task<string> GetContextExplorerPageTitle()
+        {
+            var full = await GetPageTitleText();
+            if (full.Contains("\n"))
+            {
+                var a = full.Split("\n")[1].Trim();
+                return a;
+            }
+            else
+            {
+                return full;
+            }
+        }
+        public ILocator GetCreateNewContextBtn() => CreateNewContextBtn;        
+        public async Task<BuilderPage> ClickCreateNewContextBtn()
+        {
+            await CreateNewContextBtn.ClickAsync();
+            await Expect(GetPageTitleLocator()).ToContainTextAsync("Builder");
+            return new BuilderPage(Page);
+        }
+        public ILocator GetCreateNewCustomerAccountBtn() => CreateNewCustomerAccountBtn;
+        public async Task<CreateCompanyPage> ClickCreateNewCustomerAccountBtn()
+        {
+            await CreateNewCustomerAccountBtn.ClickAsync();
+            await Expect(GetPageTitleLocator()).ToContainTextAsync("Create New Customer Account");
+            return new CreateCompanyPage(Page);
+        }
+        public ILocator GetLabelFilter() => LabelFilter;
+        public async Task<List<string>> GetLabelFilterOptions()
+        {
+            await LabelFilterArrow.ClickAsync();
+            await LabelFilterOption.First.WaitForAsync();
+            var handles = await LabelFilterOption.ElementHandlesAsync();
+            var options = new List<string>(handles.Count);
+            foreach (var handle in handles)
+            {
+                var text = (await handle.TextContentAsync()) ?? string.Empty;
+                options.Add(text.Trim());
+            }
+            return options;
+        }
+        public ILocator GetAccountFilter() => AccountFilter;
+        public ILocator GetDateRangeFilter() => DateRangeFilter;
+        public ILocator GetColumnsBtn() => ColumnsBtn;
+
+        //grid
+        public async Task<List<string>> GetContextNames()
+        {
+            await GridContextName.First.WaitForAsync();
+            var handles = await GridContextName.ElementHandlesAsync();
+            var names = new List<string>(handles.Count);
+            foreach (var handle in handles)
+            {
+                var text = (await handle.TextContentAsync()) ?? string.Empty;
+                if (!text.Contains("No label records"))
+                {
+                    names.Add(text.Trim());
+                }
+            }
+            return names;
+        }
+        public async Task<int> GetContextNamesCount()
+        {
+            var handles = await GridContextName.AllTextContentsAsync();
+            return handles.Count;
+        }
+        public async Task<int> GetGridRecordsCount()
+        {
+            var emptyMessage = await GridEmptyMessage.TextContentAsync();
+            if (emptyMessage != null && emptyMessage.Contains("No context records"))
+            {
+                return 0;
+            }
+            else
+            {
+                return await GetContextNamesCount();
+            }
+        }
+
+
+
+        //DB
+        public async Task DeleteNewAutotestContextFromNeo4j(string name)
+        {
+            using var driver = GraphDatabase.Driver(Config.Neo4jConnectionStringTest, AuthTokens.Basic(Config.Neo4jUsernameTest, Config.Neo4jPasswordTest));
+            await using var session = driver.AsyncSession();
+
+            var cypher1 = $"MATCH (n) WHERE n.Name = '{name}' DETACH DELETE n";
+
+            await using var tx = await session.BeginTransactionAsync();
+            var cursor1 = await tx.RunAsync(cypher1);
+            await tx.CommitAsync();
+        }
+    }
+}

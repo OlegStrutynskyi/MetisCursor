@@ -1,0 +1,156 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Playwright;
+using Neo4j.Driver;
+using System.Threading.Tasks;
+using static Microsoft.Playwright.Assertions;
+using Config = MetisPlaywright.Utils.Config;
+
+namespace MetisPlaywright.Pages
+{
+    public class ContextSettingsPage : BasePage
+    {
+        public ContextSettingsPage(IPage page) : base(page) { }
+
+        private ILocator ContextSettingsModal => Page.Locator("//div[@role='dialog']//h3[contains(text(),'Context Settings')]");
+        private ILocator ContextSettingsTitle => Page.Locator("//div[@role='dialog']//h3").First;
+        private ILocator ContextSettingsConfigurationTab => Page.Locator("//div[@role='dialog']//button[normalize-space()='Configuration']").First;
+        private ILocator ContextSettingsPrivacyTab => Page.Locator("//div[@role='dialog']//button[normalize-space()='Privacy']").First;
+        private ILocator ContextSettingsLabelsTab => Page.Locator("//div[@role='dialog']//button[normalize-space()='Labels']").First;
+        private ILocator ContextSettingsNotificationsTab => Page.Locator("//div[@role='dialog']//button[normalize-space()='Notifications']").First;
+        private ILocator ContextSettingsChatTab => Page.Locator("//div[@role='dialog']//button[normalize-space()='Chat']").First;
+        private ILocator ContextSettingsCancelBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Cancel']").First;
+        private ILocator ContextSettingsSetupLaterBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Setup later']").First;
+        private ILocator ContextSettingsCreateBtn => Page.Locator("//div[@role='dialog']//button[normalize-space()='Create']").First;
+        private ILocator ContextSettingsCloseIcon => Page.Locator("//div[@role='dialog']//img[@src='/images/close.svg']").First;
+
+        //Configuration tab
+        private ILocator ConfigurationTabMessage => Page.Locator("//label[normalize-space()='Context Title']/ancestor::div[contains(@class,'flex items-center gap-2')]/preceding-sibling::div/p");
+        private ILocator ContextTitleInput => Page.Locator("//label[normalize-space()='Context Title']/../following-sibling::div//input");
+        private ILocator ContextTitleError => Page.Locator("//label[normalize-space()='Context Title']/../../following-sibling::div[contains(@class,'validation-message')]").First;
+        private ILocator ContextDescriptionInput => Page.Locator("//label[normalize-space()='Context Description']/../following-sibling::div//textarea");
+        private ILocator CustomerAccountDropdown => Page.Locator("//label[normalize-space()='Customer Account']/../following-sibling::div//input");
+        private ILocator CustomerAccountArrow => Page.Locator("//label[normalize-space()='Customer Account']/../following-sibling::div//span[contains(@class,'e-icons')]");
+        private ILocator CustomerAccountDropdownOption => Page.Locator("//li/div/span[@class='text-base']");
+        private ILocator CustomerAccountError => Page.Locator("//label[normalize-space()='Customer Account']/../../following-sibling::div[contains(@class,'validation-message')]").First;
+        private ILocator PredecessorsInput => Page.Locator("//label[normalize-space()='Predecessors']/../following-sibling::div//input");
+        private ILocator SuccessorsInput => Page.Locator("//label[normalize-space()='Successors']/../following-sibling::div//input");
+
+        //Privacy tab
+
+
+        //Labels tab
+        private ILocator LabelsTabMessage => Page.Locator("//label[normalize-space()='Labels']/ancestor::div[contains(@class,'items-center')]/preceding-sibling::p");
+        private ILocator LabelsInput => Page.Locator("//label[normalize-space()='Labels']/../following-sibling::div//input");
+        private ILocator LabelsInputJob => Page.Locator("//li[normalize-space()='Job']");
+        private ILocator LabelsInputSelectedLabels => Page.Locator("//span[@class='text-xs font-medium']");
+
+
+        public ILocator GetContextSettingsModal() => ContextSettingsModal;
+        public async Task<string> GetContextSettingsTitle()
+        {
+            await ContextSettingsTitle.WaitForAsync();
+            return (await ContextSettingsTitle.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetContextSettingsConfigurationTab() => ContextSettingsConfigurationTab;
+        public async Task ClickContextSettingsConfigurationTab() => await ContextSettingsConfigurationTab.ClickAsync();
+        public ILocator GetContextSettingsPrivacyTab() => ContextSettingsPrivacyTab;
+        public async Task ClickContextSettingsPrivacyTab() => await ContextSettingsPrivacyTab.ClickAsync();
+        public ILocator GetContextSettingsLabelsTab() => ContextSettingsLabelsTab;
+        public async Task ClickContextSettingsLabelsTab() => await ContextSettingsLabelsTab.ClickAsync();
+        public ILocator GetContextSettingsNotificationsTab() => ContextSettingsNotificationsTab;
+        public async Task ClickContextSettingsNotificationsTab() => await ContextSettingsNotificationsTab.ClickAsync();
+        public ILocator GetContextSettingsChatTab() => ContextSettingsChatTab;
+        public async Task ClickContextSettingsChatTab() => await ContextSettingsChatTab.ClickAsync();
+        public ILocator GetContextSettingsCancelBtn() => ContextSettingsCancelBtn;
+        public async Task ClickContextSettingsCancelBtn() => await ContextSettingsCancelBtn.ClickAsync();
+        public ILocator GetContextSettingsSetupLaterBtn() => ContextSettingsSetupLaterBtn;
+        public async Task ClickContextSettingsSetupLaterBtn() => await ContextSettingsSetupLaterBtn.ClickAsync();
+        public ILocator GetContextSettingsCreateBtn() => ContextSettingsCreateBtn;
+        public async Task ClickContextSettingsCreateBtn() => await ContextSettingsCreateBtn.ClickAsync();
+        public ILocator GetContextSettingsCloseIcon() => ContextSettingsCloseIcon;
+        public async Task ClickContextSettingsCloseIcon() => await ContextSettingsCloseIcon.ClickAsync();
+
+        //Configuration tab
+        public async Task<string> GetConfigurationTabMessage()
+        {
+            await ConfigurationTabMessage.WaitForAsync();
+            return (await ConfigurationTabMessage.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetContextTitleInput() => ContextTitleInput;
+        public async Task<string> GetContextTitleError()
+        {
+            await ContextTitleError.WaitForAsync();
+            return (await ContextTitleError.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetContextDescriptionInput() => ContextDescriptionInput;
+        public ILocator GetCustomerAccountDropdown() => CustomerAccountDropdown;
+        public ILocator GetCustomerAccountArrow() => CustomerAccountArrow;
+        public async Task<List<string>> GetCustomerAccountDropdownOptions()
+        {
+            var optionsCount = await CustomerAccountDropdownOption.CountAsync();
+            var options = new List<string>();
+            for (int i = 0; i < optionsCount; i++)
+            {
+                var optionText = await CustomerAccountDropdownOption.Nth(i).TextContentAsync();
+                if (optionText != null)
+                {
+                    options.Add(optionText.Trim());
+                }
+            }
+            return options;
+        }
+        public async Task SelectCustomerAccountOptionRandomly()
+        {
+            var optionsCount = await CustomerAccountDropdownOption.CountAsync();
+            if (optionsCount == 0)
+            {
+                throw new InvalidOperationException("No customer account options available");
+            }
+            var random = new Random();
+            var randomIndex = random.Next(0, optionsCount);
+            await CustomerAccountDropdownOption.Nth(randomIndex).ClickAsync();
+        }
+        public async Task<string> GetCustomerAccountError()
+        {
+            await CustomerAccountError.WaitForAsync();
+            return (await CustomerAccountError.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetPredecessorsInput() => PredecessorsInput;
+        public ILocator GetSuccessorsInput() => SuccessorsInput;
+
+
+        //Privacy tab
+
+
+        //Labels tab
+        public async Task<string> GetLabelsTabMessage()
+        {
+            await LabelsTabMessage.WaitForAsync();
+            return (await LabelsTabMessage.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetLabelsInput() => LabelsInput;
+        public async Task ClickLabelsInput() => await LabelsInput.ClickAsync();
+        public async Task ClickLabelsInputJob()
+        {
+            await ClickLabelsInput();
+            await LabelsInputJob.ClickAsync();
+            
+        }
+        public async Task<List<string>> GetLabelsInputSelectedLabels()
+        {
+            var selectedCount = await LabelsInputSelectedLabels.CountAsync();
+            var selectedLabels = new List<string>();
+            for (int i = 0; i < selectedCount; i++)
+            {
+                var labelText = await LabelsInputSelectedLabels.Nth(i).TextContentAsync();
+                if (labelText != null)
+                {
+                    selectedLabels.Add(labelText.Trim());
+                }
+            }
+            return selectedLabels;
+        }
+    }
+}

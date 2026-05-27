@@ -1,0 +1,133 @@
+﻿using System.Threading.Tasks;
+using NUnit.Framework;
+using MetisPlaywright.Pages;
+using FluentAssertions;
+
+namespace MetisPlaywright.Tests
+{
+    public class LeftMenuTests : BaseTest
+    {
+        [Test]
+        public async Task T01_LeftMenu_NavigationItemsVisible()
+        {
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+
+            (await leftMenu.GetDashboardIcon().IsVisibleAsync()).Should().BeTrue("Dashboard icon should be visible in left menu.");
+            //(await leftMenu.GetReportsIcon().IsVisibleAsync()).Should().BeTrue("Reports icon should be visible in left menu."); //it is hidden
+            (await leftMenu.GetContextExplorerIcon().IsVisibleAsync()).Should().BeTrue("Context Explorer icon should be visible in left menu.");
+            (await leftMenu.GetLabelsIcon().IsVisibleAsync()).Should().BeTrue("Labels icon should be visible in left menu.");
+            (await leftMenu.GetTemplatesIcon().IsVisibleAsync()).Should().BeTrue("Templates icon should be visible in left menu.");
+            (await leftMenu.GetResourceManagerIcon().IsVisibleAsync()).Should().BeTrue("Resource Manager icon should be visible in left menu.");
+            //(await leftMenu.GetOptimizationsIcon().IsVisibleAsync()).Should().BeTrue("Optimizations icon should be visible in left menu."); //it is hidden
+            (await leftMenu.GetPeopleIcon().IsVisibleAsync()).Should().BeTrue("People icon should be visible in left menu.");
+            (await leftMenu.GetCustomerAccountsIcon().IsVisibleAsync()).Should().BeTrue("Customer Accounts icon should be visible in left menu.");
+            (await leftMenu.GetStartOptimizationIcon().IsVisibleAsync()).Should().BeTrue("Start Optimization icon should be visible in left menu.");
+            //(await leftMenu.GetSupportIcon().IsVisibleAsync()).Should().BeTrue("Support icon should be visible in left menu."); //it is hidden
+            (await leftMenu.GetSettingsIcon().IsVisibleAsync()).Should().BeTrue("Settings icon should be visible in left menu.");
+            (await leftMenu.GetLogOutIcon().IsVisibleAsync()).Should().BeTrue("Log out icon should be visible in left menu.");
+        }
+
+        [Test]
+        public async Task T02_LeftMenu_NavigateToContexts()
+        {
+            string expectedUrl = "contexts";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickContextExplorerIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Context Explorer icon should navigate to the Context Explorer page.");
+        }
+
+        [Test]
+        public async Task T03_LeftMenu_NavigateToLabels()
+        {
+            string expectedUrl = "labels";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickLabelsIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Labels icon should navigate to the Labels page.");
+        }
+
+        [Test]
+        public async Task T04_LeftMenu_NavigateToTemplates()
+        {
+            string expectedUrl = "templates";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickTemplatesIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Templates icon should navigate to the Templates page.");
+        }
+
+        [Test]
+        public async Task T05_LeftMenu_NavigateToResourceManager()
+        {
+            string expectedUrl = "resources";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickResourceManagerIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Resource Manager icon should navigate to the Resource Manager page.");
+        }
+
+        [Test]
+        public async Task T06_LeftMenu_NavigateToPeople()
+        {
+            string expectedUrl = "people";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickPeopleIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on People icon should navigate to the People page.");
+        }
+
+        [Test]
+        public async Task T07_LeftMenu_NavigateToCustomerAccounts()
+        {
+            string expectedUrl = "customers";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickCustomerAccountsIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Customer Accounts icon should navigate to the Customer Accounts page.");
+        }
+
+        [Test]
+        public async Task T08_LeftMenu_NavigateToSettings()
+        {
+            string expectedUrl = "settings";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickSettingsIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Settings icon should navigate to the Settings page.");
+        }
+
+        [Test]
+        public async Task T10_LeftMenu_LogOut()
+        {
+            string expectedUrl = "login";
+            string expectedTitle = "Login";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickLogOutIcon();
+            await Fixture.Page.WaitForURLAsync(url => url.Contains(expectedUrl));
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Log out icon should navigate to the Login page.");
+
+            var loginPage = new LoginPage(Fixture.Page);
+            var actualTitle = await loginPage.GetLoginPageTitle();
+            actualTitle.Should().Be(expectedTitle, "Login page title should be displayed after logging out.");
+        }
+    }   
+}

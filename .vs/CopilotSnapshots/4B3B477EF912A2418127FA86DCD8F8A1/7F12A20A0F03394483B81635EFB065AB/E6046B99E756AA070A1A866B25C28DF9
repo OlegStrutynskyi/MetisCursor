@@ -1,0 +1,98 @@
+﻿using System.Threading.Tasks;
+using NUnit.Framework;
+using MetisPlaywright.Utils;
+using FluentAssertions;
+
+namespace MetisPlaywright.Tests
+{
+    public class CreatePasswordTests : BaseTest
+    {
+        [Test]
+        public async Task T01_CreatePassword_DefaultView()
+        {
+            string expectedTitle = "Create Your Password";
+            string expectedMessage = "To finish setting up your account, create a strong password with at least 8 characters, including uppercase, lowercase, a number and a special character (e.g.! @ # $ %).";
+            string expectedPasswordPlaceholder = "Enter a password";
+            string expectedConfirmPasswordPlaceholder = "Confirm your password";
+
+            var createPasswordPage = new Pages.CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.GetCreatePasswordPage();
+            var actualTitle = await createPasswordPage.GetCreatePasswordTitle();
+            var actualMessage = await createPasswordPage.GetCreatePasswordMessage();
+            var actualPasswordPlaceholder = await createPasswordPage.GetPasswordPlaceholder();
+            var actualConfirmPasswordPlaceholder = await createPasswordPage.GetConfirmPasswordPlaceholder();
+            var passwordInput = createPasswordPage.GetPasswordInput();
+            var confirmPasswordInput = createPasswordPage.GetConfirmPasswordInput();
+            var setPasswordButton = createPasswordPage.GetSetPasswordButton();
+            
+            actualTitle.Should().Be(expectedTitle, "Create Password page title is not correct.");
+            actualMessage.Should().Be(expectedMessage, "Create Password page message is not correct.");
+            (await passwordInput.IsVisibleAsync()).Should().BeTrue("Password input should be visible.");
+            (await confirmPasswordInput.IsVisibleAsync()).Should().BeTrue("Confirm Password input should be visible.");
+            actualPasswordPlaceholder.Should().Be(expectedPasswordPlaceholder, "Password input placeholder is not correct.");
+            actualConfirmPasswordPlaceholder.Should().Be(expectedConfirmPasswordPlaceholder, "Confirm Password input placeholder is not correct.");
+            (await setPasswordButton.IsVisibleAsync()).Should().BeTrue("Set Password button should be visible.");
+        }
+
+        [Test]
+        public async Task T02_CreatePassword_EmptyFields_ShowsErrors()
+        {
+            string exptectedPasswordError = "'Password' is required.";
+            string expectedConfirmPasswordError = "'Confirm Password' is required.";
+
+            var createPasswordPage = new Pages.CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.GetCreatePasswordPage();
+            await createPasswordPage.ClickSetPasswordButton();
+            var actualPasswordError = await createPasswordPage.GetPasswordErrorMessage();
+            var actualConfirmPasswordError = await createPasswordPage.GetConfirmPasswordErrorMessage();
+
+            actualPasswordError.Should().Be(exptectedPasswordError, "An error message for the empty Password field should be shown.");
+            actualConfirmPasswordError.Should().Be(expectedConfirmPasswordError, "An error message for the empty Confirm Password field should be shown.");
+        }
+
+        [Test]
+        public async Task T03_CreatePassword_NoUppercase()
+        {
+            string incorrectPassword = "test123!";
+            string expectedUppercaseError = "Password must include UPPERCASE letters.";
+
+            var createPasswordPage = new Pages.CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.GetCreatePasswordPage();
+            await createPasswordPage.GetPasswordInput().FillAsync(incorrectPassword);
+            await createPasswordPage.ClickSetPasswordButton();
+            var actualPasswordError = await createPasswordPage.GetPasswordErrorMessage();
+
+            actualPasswordError.Should().Be(expectedUppercaseError, "An error message for missing uppercase letters should be shown.");
+        }
+
+        [Test]
+        public async Task T04_CreatePassword_NoLowercase()
+        {
+            string incorrectPassword = "TEST123!";
+            string expectedLowercaseError = "Password must include lowercase letters.";
+
+            var createPasswordPage = new Pages.CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.GetCreatePasswordPage();
+            await createPasswordPage.GetPasswordInput().FillAsync(incorrectPassword);
+            await createPasswordPage.ClickSetPasswordButton();
+            var actualPasswordError = await createPasswordPage.GetPasswordErrorMessage();
+
+            actualPasswordError.Should().Be(expectedLowercaseError, "An error message for missing lowercase letters should be shown.");
+        }
+
+        [Test]
+        public async Task T05_CreatePassword_NoDigit()
+        {
+            string incorrectPassword = "TESTtest!";
+            string expectedDigitError = "Password must include digits.";
+
+            var createPasswordPage = new Pages.CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.GetCreatePasswordPage();
+            await createPasswordPage.GetPasswordInput().FillAsync(incorrectPassword);
+            await createPasswordPage.ClickSetPasswordButton();
+            var actualPasswordError = await createPasswordPage.GetPasswordErrorMessage();
+
+            actualPasswordError.Should().Be(expectedDigitError, "An error message for missing digits should be shown.");
+        }
+    }
+}

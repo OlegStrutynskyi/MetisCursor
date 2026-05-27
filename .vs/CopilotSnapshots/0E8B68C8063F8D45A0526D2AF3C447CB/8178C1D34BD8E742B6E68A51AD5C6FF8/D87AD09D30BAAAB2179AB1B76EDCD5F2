@@ -1,0 +1,48 @@
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.Playwright;
+
+namespace MetisPlaywright.Fixtures
+{
+    public class PlaywrightFixture : IAsyncDisposable
+    {
+        public IPlaywright Playwright { get; private set; } = null!;
+        public IBrowser Browser { get; private set; } = null!;
+        public IBrowserContext Context { get; private set; } = null!;
+        public IPage Page { get; private set; } = null!;
+
+        public async Task InitializeAsync()
+        {
+            Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+            Browser = await Playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            {
+                Headless = false,
+                Args = new[] { "--window-size=1920,1080" }
+            });
+
+            Context = await Browser.NewContextAsync(new BrowserNewContextOptions
+            {
+                ViewportSize = new ViewportSize { Width = 1920, Height = 1080 }
+            });
+            Page = await Context.NewPageAsync();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (Context != null)
+            {
+                await Context.CloseAsync();
+                Context = null;
+            }
+
+            if (Browser != null)
+            {
+                await Browser.CloseAsync();
+                Browser = null;
+            }
+
+            Playwright?.Dispose();
+            Playwright = null;
+        }
+    }
+}

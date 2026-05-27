@@ -1,0 +1,111 @@
+﻿using MetisPlaywright.Tests;
+using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
+
+namespace MetisPlaywright.Pages
+{
+    public abstract class BasePage
+    {
+        protected IPage Page { get; }
+
+        protected BasePage(IPage page)
+        {
+            Page = page;
+        }
+
+        private ILocator PageTitle => Page.Locator("//h1").First;
+        public ILocator DropdownOptions => Page.Locator("//div[@role='dialog']//li");
+        private ILocator GridEmptyMessage => Page.Locator("//tr/td//span[contains(., 'No')]");
+        private ILocator GridPaginatorNextPageArrow => Page.Locator("//div[contains(@class,'e-next e-icons')]");
+        private ILocator GridTotalRecords => Page.Locator("//span[contains(@class,'e-pagecountmsg')]");
+
+
+        public async Task<string> GetPageTitleText()
+        {
+            await PageTitle.WaitForAsync();
+            return (await PageTitle.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetPageTitleLocator()
+        {
+            return PageTitle;
+        }
+        public async Task<List<string>> GetDropdownOptions()
+        {
+            await DropdownOptions.First.WaitForAsync();
+            var handles = await DropdownOptions.ElementHandlesAsync();
+            var options = new List<string>(handles.Count);
+            foreach (var handle in handles)
+            {
+                var text = (await handle.TextContentAsync()) ?? string.Empty;
+                options.Add(text.Trim());
+            }
+            return options;
+        }
+        public async Task SelectDropdownOptionRandomly()
+        {
+            var options = DropdownOptions;
+            Thread.Sleep(1000); // Wait for the options to be fully loaded
+            var count = await options.CountAsync();
+            var randomOption = new Random().Next(0, count);
+            await options.Nth(randomOption).ClickAsync();
+        }
+
+        public async Task<string> GetGridEmptyMessage()
+        {
+            await GridEmptyMessage.WaitForAsync();
+            await Expect(GridEmptyMessage).ToContainTextAsync("No");
+            return (await GridEmptyMessage.TextContentAsync()) ?? string.Empty;
+        }
+        public async Task ClickGridPaginatorNextPageArrow()
+        {
+            await GridPaginatorNextPageArrow.WaitForAsync();
+            await GridPaginatorNextPageArrow.ClickAsync();
+        }
+        public async Task<int> GetGridTotalRecords()
+        {
+            Thread.Sleep(1000); // Wait for the grid to be fully loaded
+            await Expect(GridTotalRecords).ToContainTextAsync("item");
+            string full = await GridTotalRecords.TextContentAsync();
+            string a = full.Split("(")[1];
+            int count = int.Parse(a.Split(" ")[0]);
+            return count;
+        }
+        public async Task<List<string>> GetGridTotalNames()
+        {
+            var allNames = new List<string>();
+
+            // Get names from the first page
+            var firstPageNames = await GetContextNames();
+            allNames.AddRange(firstPageNames);
+
+            // Check if the next page arrow is enabled and navigate through all pages
+            while (await IsGridPaginatorNextPageArrowEnabled())
+            {
+                await ClickGridPaginatorNextPageArrow();
+                Thread.Sleep(500); // Wait for the grid to load the next page
+                var nextPageNames = await GetContextNames();
+                allNames.AddRange(nextPageNames);
+            }
+
+            return allNames;
+        }
+        private async Task<bool> IsGridPaginatorNextPageArrowEnabled()
+        {
+            try
+            {
+                await GridPaginatorNextPageArrow.WaitForAsync(new() { Timeout = 1000 });
+                var ariaDisabled = await GridPaginatorNextPageArrow.GetAttributeAsync("aria-disabled");
+                return ariaDisabled != "true";
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        protected virtual async Task<List<string>> GetContextNames()
+        {
+            // This method should be overridden in derived page classes
+            throw new NotImplementedException("GetContextNames must be implemented in derived class");
+        }
+    }
+}

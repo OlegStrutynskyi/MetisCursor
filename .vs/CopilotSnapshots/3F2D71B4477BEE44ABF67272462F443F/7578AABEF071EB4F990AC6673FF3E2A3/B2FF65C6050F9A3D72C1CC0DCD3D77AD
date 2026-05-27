@@ -1,0 +1,91 @@
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.Playwright;
+
+namespace MetisPlaywright.Fixtures
+{
+    public class PlaywrightFixture : IAsyncDisposable
+    {
+        public bool Initialized { get; private set; }
+        private IPlaywright _playwright = null!;
+        private IBrowser _browser = null!;
+        private IBrowserContext _context = null!;
+        private IPage _page = null!;
+
+        public IPlaywright Playwright
+        {
+            get
+            {
+                if (!Initialized)
+                    throw new InvalidOperationException("PlaywrightFixture is not initialized. Call InitializeAsync() before accessing Playwright.");
+                return _playwright;
+            }
+            private set => _playwright = value;
+        }
+
+        public IBrowser Browser
+        {
+            get
+            {
+                if (!Initialized)
+                    throw new InvalidOperationException("PlaywrightFixture is not initialized. Call InitializeAsync() before accessing Browser.");
+                return _browser;
+            }
+            private set => _browser = value;
+        }
+
+        public IBrowserContext Context
+        {
+            get
+            {
+                if (!Initialized)
+                    throw new InvalidOperationException("PlaywrightFixture is not initialized. Call InitializeAsync() before accessing Context.");
+                return _context;
+            }
+            private set => _context = value;
+        }
+
+        public IPage Page
+        {
+            get
+            {
+                if (!Initialized)
+                    throw new InvalidOperationException("PlaywrightFixture is not initialized. Call InitializeAsync() before accessing Page.");
+                return _page;
+            }
+            private set => _page = value;
+        }
+
+        public async Task InitializeAsync()
+        {
+            Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+            Browser = await Playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            {
+                Headless = false,
+                Args = new[] { "--window-size=1920,1080" }
+            });
+
+            Context = await Browser.NewContextAsync(new BrowserNewContextOptions
+            {
+                ViewportSize = new ViewportSize { Width = 1920, Height = 1080 }
+            });
+            Page = await Context.NewPageAsync();
+            Initialized = true;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (Context != null)
+            {
+                await Context.CloseAsync();
+            }
+
+            if (Browser != null)
+            {
+                await Browser.CloseAsync();
+            }
+            Playwright?.Dispose();
+            Initialized = false;
+        }
+    }
+}

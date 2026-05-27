@@ -1,0 +1,93 @@
+﻿using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
+using Neo4j.Driver;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
+
+namespace MetisPlaywright.Pages
+{
+    public class CustomerAccountsPage : BasePage
+    {
+        public CustomerAccountsPage(IPage page) : base(page) { }
+
+        private ILocator PageTitle => Page.Locator("//h1").First;
+        private ILocator CreateCustomerAccountBtn => Page.Locator("//button[normalize-space()='Create Customer Account']").First;
+
+        //grid
+        private ILocator GridCustomerName => Page.Locator("//tr/td[1]//span[@class='ml-4 truncate text-base']");
+
+
+
+        public async Task GetCustomerAccountsPage()
+        {
+            var leftMenu = new LeftMenuPage(Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickCustomerAccountsIcon();
+            // wait for the page title to be visible and have the expected text
+            await PageTitle.WaitForAsync();
+            await Expect(PageTitle).ToHaveTextAsync("Customer Accounts");
+        }
+
+        public async Task<string> GetPageTitle()
+        {
+            await PageTitle.WaitForAsync();
+            return (await PageTitle.TextContentAsync()) ?? string.Empty;
+        }
+        public async Task<CompanyDetailsPage> ClickCreateCustomerAccountBtn()
+        {
+            await CreateCustomerAccountBtn.ClickAsync();
+            return new CompanyDetailsPage(Page);
+        }
+
+
+        //grid
+
+
+
+        //Neo4j 
+
+
+        public async Task<string> GetLastCustomer()
+        {
+            using var driver = GraphDatabase.Driver("neo4j+s://4f1d2c8b.databases.neo4j.io", AuthTokens.Basic("neo4j", "0hfQ_UxUfOvesJ4Z7RNxFGjSFA2pdd1Nov1iVC6zAwY"));
+            await using var session = driver.AsyncSession();
+
+            var cypher = @"MATCH (n:CustomerAccountEntity) RETURN n ORDER BY n.DateCreated DESC LIMIT 1";
+
+            // start a transaction, run the query, then read results
+            await using var tx = await session.BeginTransactionAsync();
+            var cursor = await tx.RunAsync(cypher);
+            var records = await cursor.ToListAsync();
+
+            if (records.Count == 0)
+            {
+                await tx.CommitAsync();
+                return string.Empty;
+            }
+
+            var record = records[0];
+            var node = record["n"].As<INode>();
+
+            // Try common property keys for the customer's name
+            string name = string.Empty;
+            if (node.Properties != null)
+            {
+                if (node.Properties.TryGetValue("name", out var val) || node.Properties.TryGetValue("Name", out val))
+                {
+                    name = val?.ToString() ?? string.Empty;
+                }
+            }
+
+            Console.WriteLine($"Last customer name: {name}");
+
+            await tx.CommitAsync();
+            return name;
+        }
+
+
+    }
+}
+
+

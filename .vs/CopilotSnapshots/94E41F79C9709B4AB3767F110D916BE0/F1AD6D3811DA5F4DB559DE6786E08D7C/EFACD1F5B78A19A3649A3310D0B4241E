@@ -1,0 +1,64 @@
+﻿using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using Neo4j.Driver;
+using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
+
+namespace MetisPlaywright.Pages
+{
+    public class CustomerAccountsPage : BasePage
+    {
+        public CustomerAccountsPage(IPage page) : base(page) { }
+
+        private ILocator PageTitle => Page.Locator("//h1").First;
+
+        public async Task GetCustomerAccountsPage()
+        {
+            var leftMenu = new LeftMenuPage(Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickCustomerAccountsIcon();
+                       
+        }
+
+        public async Task<string> GetPageTitle()
+        {
+            await PageTitle.WaitForAsync();
+            return (await PageTitle.TextContentAsync()) ?? string.Empty;
+        }
+
+
+
+
+        //Neo4j 
+            
+
+        public async Task GetCustomer()
+        {
+            using var driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "0hfQ_UxUfOvesJ4Z7RNxFGjSFA2pdd1Nov1iVC6zAwY"));
+            await using var session = driver.AsyncSession();
+
+            var cypher = @"MATCH (n:CustomerAccountEntity) RETURN n ORDER BY n.DateCreated DESC LIMIT 1";
+
+            // start a transaction, run the query, then read results
+            await using var tx = await session.BeginTransactionAsync();
+            var cursor = await tx.RunAsync(cypher);
+            var records = await cursor.ToListAsync();
+            Console.WriteLine(records.Count);
+
+            //foreach (var record in records)
+            //{
+            //    var node = record["m"].as<inode>();
+            //    var title = node.properties.containskey("title") ? node.properties["title"]?.as<string>() : null;
+            //    var count = record["watchers"].as<long>();
+
+            //    console.writeline($"'{title}' had {count} watchers");
+            //}
+
+            await tx.CommitAsync();
+        }
+
+
+    }
+}
+
+

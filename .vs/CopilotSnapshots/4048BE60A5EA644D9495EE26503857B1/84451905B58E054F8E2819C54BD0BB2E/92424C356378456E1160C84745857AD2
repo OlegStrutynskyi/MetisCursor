@@ -1,0 +1,48 @@
+﻿using System.Threading.Tasks;
+using NUnit.Framework;
+using MetisPlaywright.Pages;
+using MetisPlaywright.Utils;
+using FluentAssertions;
+
+namespace MetisPlaywright.Tests
+{
+    public class LoginPageTest : BaseTest
+    {
+        [Test]
+        public async Task T01_LoginPage_DefaultView()
+        {
+            string expectedTitle = "Login";
+            string expectedMessage = "Welcome back! Please enter your details.";
+            string expectedEmailPlaceholder = "Enter your email";
+            string expectedPasswordPlaceholder = "Enter your password";
+
+            await Fixture.Page.GotoAsync(Config.BaseUrl);
+
+            var loginPage = new LoginPage(Fixture.Page);
+            var actualTitle = await loginPage.GetLoginPageTitle();
+            var actualMessage = await loginPage.GetLoginPageMessage();
+            var emailInput = loginPage.GetEmailInput();
+            var actualEmailPlaceholder = await loginPage.GetEmailPlaceholder();
+            var passwordInput = loginPage.GetPasswordInput();
+            var actualPasswordPlaceholder = await loginPage.GetPasswordPlaceholder();
+            var rememberCheckbox = loginPage.GetRememberCheckbox();
+            var forgotPasswordLink = loginPage.GetForgotPasswordLink();
+            var loginButton = loginPage.GetLoginBtn();
+
+            Assert.That(actualTitle, Is.EqualTo(expectedTitle), "Login page title is not correct.");
+            Assert.That(actualMessage, Is.EqualTo(expectedMessage), "Login page message is not correct.");
+            Assert.That(emailInput, Is.Not.Null, "Email input field is not present.");
+            Assert.That(actualEmailPlaceholder, Is.EqualTo(expectedEmailPlaceholder), "Email placeholder text is not correct.");
+            Assert.That(passwordInput, Is.Not.Null, "Password input field is not present.");
+            Assert.That(actualPasswordPlaceholder, Is.EqualTo(expectedPasswordPlaceholder), "Password placeholder text is not correct.");
+            Assert.That(rememberCheckbox, Is.Not.Null, "Remember me checkbox is not present.");
+            Assert.That(forgotPasswordLink, Is.Not.Null, "Forgot password link is not present.");
+            Assert.That(loginButton, Is.Not.Null, "Login button is not present.");
+
+            //await loginPage.LoginAsync("exampleUser", "examplePass");
+
+            // TODO: replace with real assertions validating post-login behavior
+            //Assert.Pass("Login flow executed; add real assertions.");
+        }
+    }
+}

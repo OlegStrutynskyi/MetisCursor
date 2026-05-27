@@ -1,0 +1,55 @@
+﻿using System.Threading.Tasks;
+using NUnit.Framework;
+using MetisPlaywright.Pages;
+using FluentAssertions;
+
+namespace MetisPlaywright.Tests
+{
+    public class LeftMenuTests : BaseTest
+    {
+        [Test]
+        public async Task T01_LeftMenu_NavigationItemsVisible()
+        {
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+
+            (await leftMenu.GetDashboardIcon().IsVisibleAsync()).Should().BeTrue("Dashboard icon should be visible in left menu.");
+            //(await leftMenu.GetReportsIcon().IsVisibleAsync()).Should().BeTrue("Reports icon should be visible in left menu."); //it is hidden
+            (await leftMenu.GetContextExplorerIcon().IsVisibleAsync()).Should().BeTrue("Context Explorer icon should be visible in left menu.");
+            (await leftMenu.GetLabelsIcon().IsVisibleAsync()).Should().BeTrue("Labels icon should be visible in left menu.");
+            (await leftMenu.GetTemplatesIcon().IsVisibleAsync()).Should().BeTrue("Templates icon should be visible in left menu.");
+            (await leftMenu.GetResourceManagerIcon().IsVisibleAsync()).Should().BeTrue("Resource Manager icon should be visible in left menu.");
+            //(await leftMenu.GetOptimizationsIcon().IsVisibleAsync()).Should().BeTrue("Optimizations icon should be visible in left menu."); //it is hidden
+            (await leftMenu.GetPeopleIcon().IsVisibleAsync()).Should().BeTrue("People icon should be visible in left menu.");
+            (await leftMenu.GetCustomerAccountsIcon().IsVisibleAsync()).Should().BeTrue("Customer Accounts icon should be visible in left menu.");
+            (await leftMenu.GetStartOptimizationIcon().IsVisibleAsync()).Should().BeTrue("Start Optimization icon should be visible in left menu.");
+            //(await leftMenu.GetSupportIcon().IsVisibleAsync()).Should().BeTrue("Support icon should be visible in left menu."); //it is hidden
+            (await leftMenu.GetSettingsIcon().IsVisibleAsync()).Should().BeTrue("Settings icon should be visible in left menu.");
+            (await leftMenu.GetLogOutIcon().IsVisibleAsync()).Should().BeTrue("Log out icon should be visible in left menu.");
+        }
+
+        [Test]
+        public async Task T02_LeftMenu_NavigateToContexts()
+        {
+            string expectedUrl = "contexts";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickContextExplorerIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Context Explorer icon should navigate to the Context Explorer page.");
+        }
+
+        [Test]
+        public async Task T03_LeftMenu_NavigateToLabels()
+        {
+            string expectedUrl = "labels";
+
+            var leftMenu = new LeftMenuPage(Fixture.Page);
+            await leftMenu.GetLeftMenuPage();
+            await leftMenu.ClickLabelsIcon();
+            var actualUrl = Fixture.Page.Url;
+            actualUrl.Should().Contain(expectedUrl, "Clicking on Labels icon should navigate to the Labels page.");
+        }
+    }   
+}

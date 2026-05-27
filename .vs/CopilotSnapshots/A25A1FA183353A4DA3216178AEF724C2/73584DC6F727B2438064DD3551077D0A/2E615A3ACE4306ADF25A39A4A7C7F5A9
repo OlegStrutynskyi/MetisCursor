@@ -1,0 +1,110 @@
+﻿using FluentAssertions;
+using MetisPlaywright.Pages;
+using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace MetisPlaywright.Tests
+{
+    public class _01_Setup_Data : BaseTest
+    {
+        // This class is intended for setting up any necessary data before running the tests.
+        // Each test method should be executed only once to create the required data, such as users, companies, etc., that will be used in subsequent tests.
+        // Uncomment needed test to execute it, and make sure to comment it back after the data is created to avoid duplicate entries in the database.
+
+
+        /*[Test]
+        public async Task T01_Setup_AutoTestsUserAndCompany()
+        {
+            var mailboxUrl = $"https://app.endtest.io/mailbox?email={Config.CorrectEmailAutoTests1}";
+            var expectedDashboardTitle = $"{Config.DefaultCoreLabel}s Dashboard";
+
+            var createCompanyPage = new CreateCompanyPage(Fixture.Page);
+            //create new company and user via API
+            var requestContext = await createCompanyPage.CreateRequestContext();
+            var response = await requestContext.PostAsync("setup", new APIRequestContextOptions
+            {
+                DataObject = new
+                {
+                    user = new
+                    {
+                        email = $"{Config.CorrectEmailAutoTests1}",
+                        firstName = $"{Config.AutoTests1FirstName}",
+                        lastName = $"{Config.AutoTests1LastName}",
+                        status = 1
+                    },
+                    company = new
+                    {
+                        name = $"{Config.AutoTests1Company}",
+                        coreLabel = $"{Config.DefaultCoreLabel}"
+                    }
+                }
+            });
+
+            //verify Response status code
+            var statusCode = response.Status;
+            statusCode.Should().Be(202, "Creating a new company with valid data should return status code 202 Accepted.");
+
+            //navigate to mailbox and click on the link to set password for the new user
+            Thread.Sleep(5000); //wait for the email to arrive in the mailbox          
+            await Fixture.Page.GotoAsync(mailboxUrl);
+            await createCompanyPage.ClickFinishLink();
+            var setupLink = await createCompanyPage.GetFinishSetupLink();
+            await Fixture.Page.GotoAsync(setupLink);
+
+            //set a password for the new user
+            var createPasswordPage = new CreatePasswordPage(Fixture.Page);
+            await createPasswordPage.GetPasswordInput().FillAsync(Config.CorrectPasswordAutoTests1);
+            await createPasswordPage.GetConfirmPasswordInput().FillAsync(Config.CorrectPasswordAutoTests1);
+            await createPasswordPage.ClickSetPasswordButton();
+
+            //assert that the user can log in successfully with the new credentials
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetEmailInput().FillAsync(Config.CorrectEmailAutoTests1);
+            await loginPage.GetPasswordInput().FillAsync(Config.CorrectPasswordAutoTests1);
+            await loginPage.ClickLoginBtn();
+
+            var dashboardPage = new DashboardPage(Fixture.Page);
+            var actualDashboardTitle = await dashboardPage.GetDashboardTitle();
+            actualDashboardTitle.Should().Be(expectedDashboardTitle, "Logging in with correct credentials should navigate to the Dashboard page.");
+
+            //delete company and user from database
+            //await createCompanyPage.DeleteNewCompanyFromPostgreSQL(Config.CorrectEmailAutoTests1);
+            //await createCompanyPage.DeleteNewCompanyFromNeo4j(Config.CorrectEmailAutoTests1);
+        }*/
+
+        [Test]
+        public async Task T02_Setup_ActivateOptimization()
+        {
+            //Get company UUID from database
+            await GetCompanyUUIDFromPostgreSQL(Config.CorrectEmailAutoTests1);
+
+            //Activate optimization for the company via database update
+
+        }
+
+
+
+        public async Task<string> GetCompanyUUIDFromPostgreSQL(string email)
+        {
+            var query = $"SELECT \"CompanyId\" FROM public.\"Companies\" WHERE \"SystemAdminEmail\"='{email}'";
+            string connectionString = Config.PostgreSqlConnectionStringTest;
+            using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
+            {
+                NpgsqlCommand command = new NpgsqlCommand(query, connection);
+                connection.Open();
+                var reader = command.ExecuteReader();
+                string companyUUID = string.Empty;
+                if (reader.Read())
+                {
+                    companyUUID = reader["CompanyId"].ToString() ?? string.Empty;
+                }
+                connection.Close();
+                return companyUUID;
+            }
+        }
+    }
+}

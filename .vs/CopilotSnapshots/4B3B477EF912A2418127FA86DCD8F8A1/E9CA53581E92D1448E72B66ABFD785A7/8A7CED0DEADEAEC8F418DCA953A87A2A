@@ -1,0 +1,70 @@
+﻿using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace MetisPlaywright.Pages
+{
+    public class CreatePasswordPage : BasePage
+    {
+        public CreatePasswordPage(IPage page) : base(page)
+        {
+        }
+
+        private ILocator CreatePasswordTitle => Page.Locator("//h1").First;
+        private ILocator CreatePasswordMessage => Page.Locator("//h1/following-sibling::p").First;
+        private ILocator PasswordInput => Page.Locator("//label[normalize-space()='Password']/following-sibling::span/input").First;
+        private ILocator ConfirmPasswordInput => Page.Locator("//label[normalize-space()='Confirm Password']/following-sibling::span/input").First;
+        private ILocator PasswordErrorMessage => Page.Locator("//label[normalize-space()='Password']/following-sibling::div/div[@class='text-sm e-error']").First;
+        private ILocator ConfirmPasswordErrorMessage => Page.Locator("//label[normalize-space()='Confirm Password']/following-sibling::div/div[@class='text-sm e-error']").First;
+        private ILocator SetPasswordBtne => Page.Locator("//button[normalize-space()='Set Password']").First;
+
+
+        public async Task GetCreatePasswordPage()
+        {
+            await Page.GotoAsync(Config.BaseUrl + "reset-password?token=CfDJ8OVzOhF4FltNjcGDh9rNApW7lFdevSUuqU0YBY-m0GgIXphVmHhrCqOF4mHUTO7NYWmDyFARHOywQ9_xqGIABxI3AwLR8m2ao8JJUeT35SvkPvM1yYIZRIST79NYfs8KtF1X96Q2LUPlEUNIYVJwco3dFbeGATVu6ZiO_6cuiGA1s91Yw2PfeaZEVKm1YltMKPl1eKT1E2vO8YNVuhYVzsPFjm065LWG2JQ9PPbHTHemkumykR2cQrRX2J2j8jbpcGXNXmX8buuIUh8jd048zpGsXYoTiE5KKUn7Mjy0l0owvx_l1XeKZ5LnlBwIfgZsi8kjGlPMwnED7VCEzeGZ0SZ6RsabvoWoqtVKYuKCYwnzjXFFnGP1yDa7_edua71adnzLE-4I9WWFMZ4MdMF0Y0ntBYJfyfnhHPEgpfasBG0-ucQhL2x0F6OMftLe4fNPX2pezwRcu1JFVLnoKKjg3ANoGNgecj1XQEcR3cwbiz87");
+            await CreatePasswordTitle.WaitForAsync();
+        }
+        public async Task<string> GetCreatePasswordTitle()
+        {
+            return (await CreatePasswordTitle.TextContentAsync()) ?? string.Empty;
+        }
+        public async Task<string> GetCreatePasswordMessage()
+        {
+            return (await CreatePasswordMessage.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetPasswordInput()
+        {
+            return PasswordInput;
+        }
+        public ILocator GetConfirmPasswordInput()
+        {
+            return ConfirmPasswordInput;
+        }
+        public async Task<string> GetPasswordPlaceholder()
+        {
+            return (await PasswordInput.GetAttributeAsync("placeholder")) ?? string.Empty;
+        }
+        public async Task<string> GetConfirmPasswordPlaceholder()
+        {
+            return (await ConfirmPasswordInput.GetAttributeAsync("placeholder")) ?? string.Empty;
+        }
+        public async Task<string> GetPasswordErrorMessage()
+        {
+            return (await PasswordErrorMessage.TextContentAsync()) ?? string.Empty;
+        }
+        public async Task<string> GetConfirmPasswordErrorMessage()
+        {
+            return (await ConfirmPasswordErrorMessage.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetSetPasswordButton()
+        {
+            return SetPasswordBtne;
+        }
+        public async Task ClickSetPasswordButton()
+        {
+            await SetPasswordBtne.ClickAsync();
+        }
+    }
+}

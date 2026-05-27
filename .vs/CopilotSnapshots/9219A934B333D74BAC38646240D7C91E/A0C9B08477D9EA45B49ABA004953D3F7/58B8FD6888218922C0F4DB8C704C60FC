@@ -1,0 +1,180 @@
+﻿using System.Threading.Tasks;
+using NUnit.Framework;
+using MetisPlaywright.Pages;
+using MetisPlaywright.Utils;
+using FluentAssertions;
+
+namespace MetisPlaywright.Tests
+{
+    public class LoginPageTest : BaseTest
+    {
+        [Test]
+        public async Task T01_LoginPage_DefaultView()
+        {
+            string expectedTitle = "Login";
+            string expectedMessage = "Welcome back! Please enter your details.";
+            string expectedEmailPlaceholder = "Enter your email";
+            string expectedPasswordPlaceholder = "Enter your password";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetLoginPage();
+            var actualTitle = await loginPage.GetLoginPageTitle();
+            var actualMessage = await loginPage.GetLoginPageMessage();
+            var emailInput = loginPage.GetEmailInput();
+            var actualEmailPlaceholder = await loginPage.GetEmailPlaceholder();
+            var passwordInput = loginPage.GetPasswordInput();
+            var actualPasswordPlaceholder = await loginPage.GetPasswordPlaceholder();
+            var rememberCheckbox = loginPage.GetRememberCheckbox();
+            var forgotPasswordLink = loginPage.GetForgotPasswordLink();
+            var loginButton = loginPage.GetLoginBtn();
+
+            actualTitle.Should().Be(expectedTitle, "Login page title is not correct.");
+            actualMessage.Should().Be(expectedMessage, "Login page message is not correct.");
+            (await emailInput.IsVisibleAsync()).Should().BeTrue("Email input field is not visible.");
+            actualEmailPlaceholder.Should().Be(expectedEmailPlaceholder, "Email placeholder text is not correct.");
+            (await passwordInput.IsVisibleAsync()).Should().BeTrue("Password input field is not visible.");
+            actualPasswordPlaceholder.Should().Be(expectedPasswordPlaceholder, "Password placeholder text is not correct.");
+            (await rememberCheckbox.IsVisibleAsync()).Should().BeTrue("'Remember me' checkbox is not visible.");
+            (await loginPage.IsRememberCheckboxCheckedAsync()).Should().BeFalse("'Remember me' checkbox should be unchecked by default.");
+            (await forgotPasswordLink.IsVisibleAsync()).Should().BeTrue("Forgot password link is not visible.");
+            (await loginButton.IsVisibleAsync()).Should().BeTrue("Login button is not visible.");
+        }
+
+        [Test]
+        public async Task T02_LoginPage_EmptyFields()
+        {
+            var expectedEmailError = "'Email' is required.";
+            var expectedPasswordError = "'Password' is required.";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetLoginPage();
+            await loginPage.ClickLoginBtn();
+            var actualEmailError = await loginPage.GetEmailErrorMessage();
+            var actualPasswordError = await loginPage.GetPasswordErrorMessage();
+
+            actualEmailError.Should().Be(expectedEmailError, "Email error should match the expected message when the email field is empty.");
+            actualPasswordError.Should().Be(expectedPasswordError, "Password error should match the expected message when the password field is empty.");
+        }
+
+        [Test]
+        public async Task T03_LoginPage_InvalidEmail()
+        {
+            var expectedInvalidEmailError = "'Email' is not a valid email address.";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetLoginPage();
+            await loginPage.GetEmailInput().FillAsync(Config.InvalidEmail);
+            await loginPage.ClickLoginBtn();
+            var actualEmailError = await loginPage.GetEmailErrorMessage();
+            
+            actualEmailError.Should().Be(expectedInvalidEmailError, "An invalid email should show the correct validation message.");
+        }
+
+        [Test]
+        public async Task T04_LoginPage_IncorrectEmail()
+        {
+            var expectedFailureMessage = "We’re having trouble logging you in. The account may not exist or might be deactivated. Please double-check your login details and try again. If the issue persists, contact Metis Support for assistance.";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetLoginPage();
+            await loginPage.GetEmailInput().FillAsync(Config.IncorrectEmail);
+            await loginPage.GetPasswordInput().FillAsync(Config.CorrectPassword);
+            await loginPage.ClickLoginBtn();
+            var actualFailure = await loginPage.GetLoginPageGeneralErrorMessage();
+
+            actualFailure.Should().Be(expectedFailureMessage, "An incorrect account should show the general login failure message.");
+        }
+
+        [Test]
+        public async Task T05_LoginPage_IncorrectPassword()
+        {
+            var expectedFailureMessage = "We’re having trouble logging you in. The account may not exist or might be deactivated. Please double-check your login details and try again. If the issue persists, contact Metis Support for assistance.";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetLoginPage();
+            await loginPage.GetEmailInput().FillAsync(Config.CorrectEmail);
+            await loginPage.GetPasswordInput().FillAsync(Config.IncorrectPassword);
+            await loginPage.ClickLoginBtn();
+            var actualFailure = await loginPage.GetLoginPageGeneralErrorMessage();
+
+            actualFailure.Should().Be(expectedFailureMessage, "An incorrect account should show the general login failure message.");
+        }
+
+        [Test]
+        public async Task T06_ForgotPasswordPageDefaultView()
+        {
+            string expectedTitle = "Forgot your password?";
+            string expectedMessage = "Please enter your email.";
+            string expectedEmailPlaceholder = "Enter your email";
+           
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetForgotPasswordPage();
+            var actualTitle = await loginPage.GetForgotPasswordTitle();
+            var actualMessage = await loginPage.GetForgotPasswordMessage();
+            var emailInput = loginPage.GetEmailInput();
+            var actualEmailPlaceholder = await loginPage.GetEmailPlaceholder();
+
+            actualTitle.Should().Be(expectedTitle, "Forgot password page title is not correct.");
+            actualMessage.Should().Be(expectedMessage, "Forgot password page message is not correct.");
+            (await emailInput.IsVisibleAsync()).Should().BeTrue("Forgot password email input should be visible.");
+            actualEmailPlaceholder.Should().Be(expectedEmailPlaceholder, "Forgot password email placeholder is not correct.");            
+        }
+
+        [Test]
+        public async Task T07_ForgorPassword_EmptyEmail()
+        {
+            var expectedEmailError = "'Email' is required.";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetForgotPasswordPage();
+            var emailInput = loginPage.GetForgotPasswordEmailInput();
+            await emailInput.FillAsync(string.Empty);
+            await loginPage.ClickForgotPasswordResetBtn();
+            var actualEmailError = await loginPage.GetForgotPasswordEmailErrorMessage();
+
+            actualEmailError.Should().Be(expectedEmailError, "Email error should be shown when Reset is clicked with empty email.");
+        }
+
+        [Test]
+        public async Task T08_ForgorPassword_InvalidEmail()
+        {
+            var expectedEmailError = "'Email' is not a valid email address.";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetForgotPasswordPage();
+            await loginPage.GetForgotPasswordEmailInput().FillAsync(Config.InvalidEmail);
+            await loginPage.ClickForgotPasswordResetBtn();
+            var actualEmailError = await loginPage.GetForgotPasswordEmailErrorMessage();
+
+            actualEmailError.Should().Be(expectedEmailError, "An invalid email on Forgot Password should show the correct validation message.");
+        }
+
+        [Test]
+        public async Task T09_ForgorPassword_CorrectEmail()
+        {
+            var expectedSuccessMessage = "We've sent a password reset email. Please follow the instructions in it.";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetForgotPasswordPage();
+            await loginPage.GetForgotPasswordEmailInput().FillAsync(Config.CorrectEmail);
+            await loginPage.ClickForgotPasswordResetBtn();
+            var actualSuccess = await loginPage.GetForgotPasswordSuccessMessage();
+
+            actualSuccess.Should().Be(expectedSuccessMessage, "A valid email on Forgot Password should show the success message.");
+        }
+
+        [Test]
+        public async Task T10_ForgorPassword_ClickLogin()
+        {
+            var expectedTitle = "Login";
+
+            var loginPage = new LoginPage(Fixture.Page);
+            await loginPage.GetForgotPasswordPage();
+            await loginPage.ClickForgotPasswordLoginBtn();
+            var actualTitle = await loginPage.GetLoginPageTitle();
+
+            actualTitle.Should().Be(expectedTitle, "Clicking 'Log in' on Forgot Password should navigate back to the Login page.");
+        }
+
+    }
+}

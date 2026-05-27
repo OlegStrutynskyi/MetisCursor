@@ -1,0 +1,44 @@
+﻿using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
+
+namespace MetisPlaywright.Pages
+{
+    public class CompanyDetailsPage : BasePage
+    {
+        public CompanyDetailsPage(IPage page) : base(page)
+        {
+        }
+
+        private ILocator PageTitle => Page.Locator("//h1").First;
+        private ILocator CompanyNameInput => Page.Locator("//label[normalize-space()='Company Name']/following-sibling::span/input");
+        private ILocator IndustryDropdown => Page.Locator("//label[normalize-space()='Industry']/following-sibling::span/input");
+        private ILocator IndustryDropdownOptions => Page.Locator("//div[@role='dialog']//li");
+
+
+
+
+
+
+        public async Task GetCreateNewCustomerPageAutoTests1()
+        {
+            var leftMenu = new LeftMenuPage(Page);
+            await leftMenu.GetLeftMenuPageAutoTests1();
+            await leftMenu.ClickCustomerAccountsIcon();
+            var customerAccountsPage = new CustomerAccountsPage(Page);
+            await customerAccountsPage.ClickCreateCustomerAccountBtn();
+            await PageTitle.WaitForAsync();
+            await Expect(PageTitle).ToHaveTextAsync("Create New Customer Account");
+        }
+        public async Task<string> GetPageTitle()
+        {
+            await PageTitle.WaitForAsync();
+            return (await PageTitle.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetCompanyNameInput()
+        {
+            return CompanyNameInput;
+        }
+        public async Task ClickIndustryDropdown() => await IndustryDropdown.ClickAsync();
+
+    }
+}

@@ -1,0 +1,153 @@
+﻿using MetisPlaywright.Utils;
+using Microsoft.Playwright;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using static Microsoft.Playwright.Assertions;
+
+namespace MetisPlaywright.Pages
+{
+    public class DashboardPage : BasePage
+    {
+        public DashboardPage(IPage page) : base(page) { }
+
+        private ILocator DashboardTitle => Page.Locator("//h1[contains(text(),'Dashboard')]").First;
+        private ILocator TotalCounter => Page.Locator("//div[contains(text(),'Total')]/following-sibling::div/h1");
+        private ILocator InProgressCounter => Page.Locator("//div[contains(text(),'In Progress')]/following-sibling::div/h1");
+        private ILocator DelayedCounter => Page.Locator("//div[contains(text(),'Delayed')]/following-sibling::div/h1");
+        private ILocator CompletedCounter => Page.Locator("//div[contains(text(),'Completed')]/following-sibling::div/h1");
+        private ILocator AllTab => Page.Locator("//div[contains(@class,'tab-item')]/div[normalize-space()='All']");
+        private ILocator InProgressTab => Page.Locator("//div[contains(@class,'tab-item')]/div[normalize-space()='In Progress']");
+        private ILocator PendingTab => Page.Locator("//div[contains(@class,'tab-item')]/div[normalize-space()='Pending']");
+        private ILocator DelayedTab => Page.Locator("//div[contains(@class,'tab-item')]/div[normalize-space()='Delayed']");
+        private ILocator CompletedTab => Page.Locator("//div[contains(@class,'tab-item')]/div[normalize-space()='Completed']");
+        private ILocator ArchivedTab => Page.Locator("//div[contains(@class,'tab-item')]/div[normalize-space()='Archived']");
+        private ILocator ShowChildrenBtn => Page.Locator("//button[normalize-space()='Show Children']");
+
+        //grid
+        private ILocator GridContextName => Page.Locator("//tr/td[3]//div[@class='text-base']");
+
+
+
+
+        public async Task GetDashboardPage()
+        {
+            var loginPage = new LoginPage(Page);
+            await loginPage.GetLoginPage();
+            await loginPage.GetEmailInput().FillAsync(Config.CorrectEmail);
+            await loginPage.GetPasswordInput().FillAsync(Config.CorrectPassword);
+            await loginPage.ClickLoginBtn();
+            await DashboardTitle.WaitForAsync();
+            var dashbordPage = new DashboardPage(Page);
+        }
+        public async Task GetDashboardPageAutoTests1()
+        {
+            var loginPage = new LoginPage(Page);
+            await loginPage.GetLoginPage();
+            await loginPage.GetEmailInput().FillAsync(Config.CorrectEmailAutoTests1);
+            await loginPage.GetPasswordInput().FillAsync(Config.CorrectPassword);
+            await loginPage.ClickLoginBtn();
+            await Expect(DashboardTitle).ToContainTextAsync("Dashboard");
+            var dashbordPage = new DashboardPage(Page);
+        }
+        public async Task<string> GetDashboardTitle()
+        {
+            await DashboardTitle.WaitForAsync();
+            return (await DashboardTitle.TextContentAsync()) ?? string.Empty;
+        }
+        public ILocator GetTotalCounter() => TotalCounter;
+        public async Task<int> GetTotalCounterValue()
+        {
+            await TotalCounter.WaitForAsync();
+            return int.Parse(await TotalCounter.TextContentAsync());
+        }
+        public ILocator GetInProgressCounter() => InProgressCounter;
+        public async Task<int> GetInProgressCounterValue()
+        {
+            await InProgressCounter.WaitForAsync();
+            return int.Parse(await InProgressCounter.TextContentAsync());
+        }
+        public ILocator GetDelayedCounter() => DelayedCounter;
+        public async Task<int> GetDelayedCounterValue()
+        {
+            await DelayedCounter.WaitForAsync();
+            return int.Parse(await DelayedCounter.TextContentAsync());
+        }
+        public ILocator GetCompletedCounter() => CompletedCounter;
+        public async Task<int> GetCompletedCounterValue()
+        {
+            await CompletedCounter.WaitForAsync();
+            return int.Parse(await CompletedCounter.TextContentAsync());
+        }
+        public ILocator GetAllTab() => AllTab;
+        public async Task ClickAllTab() => await AllTab.ClickAsync();
+        public ILocator GetInProgressTab() => InProgressTab;
+        public async Task ClickInProgressTab() => await InProgressTab.ClickAsync();
+        public ILocator GetPendingTab() => PendingTab;
+        public async Task ClickPendingTab() => await PendingTab.ClickAsync();
+        public ILocator GetDelayedTab() => DelayedTab;
+        public async Task ClickDelayedTab() => await DelayedTab.ClickAsync();
+        public ILocator GetCompletedTab() => CompletedTab;
+        public async Task ClickCompletedTab() => await CompletedTab.ClickAsync();
+        public ILocator GetArchivedTab() => ArchivedTab;
+        public async Task ClickArchivedTab() => await ArchivedTab.ClickAsync();
+        public ILocator GetShowChildrenBtn() => ShowChildrenBtn;
+        public async Task ClickShowChildrenBtn() => await ShowChildrenBtn.ClickAsync();
+
+        //grid
+        public async Task<List<string>> GetGridContextNames()
+        {
+            await GridContextName.First.WaitForAsync();
+            var handles = await GridContextName.ElementHandlesAsync();
+            var names = new List<string>(handles.Count);
+            foreach (var handle in handles)
+            {
+                var text = (await handle.TextContentAsync()) ?? string.Empty;
+                names.Add(text.Trim());
+            }
+            return names;
+        }
+        public async Task<List<string>> GetGridContextNames2()
+        {
+            await GridContextName.First.WaitForAsync();
+            var names2 = new List<string>();
+            names2 = (List<string>)await GridContextName.AllTextContentsAsync();
+            return names2;
+        }
+        public async Task<int> GetGridTotalNames()
+        {
+            await GridContextName.First.WaitForAsync();
+            var handles = await GridContextName.ElementHandlesAsync();
+            return handles.Count;
+        }
+        
+        public async Task<List<string>> GetGridContextNamesAll()
+        {
+            await GridContextName.First.WaitForAsync();
+            var names = new List<string>();
+            var nextPageArrow = GetGridPaginatorNextPageArrow();
+
+            while (true)
+            {
+                // Get context names from the current page
+                var pageNames = await GridContextName.AllTextContentsAsync();
+                names.AddRange(pageNames);
+
+                // Check if the next page arrow contains "e-disable" class
+                var classAttribute = await nextPageArrow.GetAttributeAsync("class");
+                if (classAttribute != null && classAttribute.Contains("e-disable"))
+                {
+                    break; // No more pages, exit loop
+                }
+                else
+                {
+                    // Click the next page arrow
+                    await nextPageArrow.ClickAsync();
+                    Thread.Sleep(500); // Wait for the grid to load the next page
+                }
+            }
+            
+            return names;
+        }
+    }
+}
