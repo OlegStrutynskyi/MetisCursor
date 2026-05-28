@@ -42,6 +42,8 @@ namespace MetisPlaywright.Pages
         private ILocator DetailsContextLabel => Page.Locator("//span[normalize-space()='Label:']/following-sibling::div//span[@class='e-chip-text']");
         private ILocator DetailsAddDependencyModal => Page.Locator("//div[contains(@class,'modal-content relative')]");
         private ILocator DetailsAddDependencyModalTitle => Page.Locator("//div[contains(@class,'modal-content relative')]//h3");
+        private ILocator DetailsChildrenGrid => Page.Locator("//div[contains(@class,'rounded-md')]//div[contains(@class,'sf-grid')]");
+        private ILocator DetailsChildrenGridContextName => Page.Locator("//div[contains(@class,'rounded-md')]//div[contains(@class,'sf-grid')]//span[contains(@class,'font-medium')]");
 
         public async Task OpenForAutoTests1Async()
         {
@@ -241,6 +243,17 @@ namespace MetisPlaywright.Pages
             Expect(DetailsOpenBtn).ToBeVisibleAsync(),
             Expect(DetailsAddChildBtn).ToBeVisibleAsync(),
             Expect(DetailsAddDependencyBtn).ToBeVisibleAsync());
+
+        public Task ExpectDetailsChildrenGridVisibleAsync() =>
+            Expect(DetailsChildrenGrid).ToBeVisibleAsync();
+
+        public async Task<IReadOnlyList<string>> GetDetailsChildrenGridContextNamesAsync()
+        {
+            await Expect(DetailsChildrenGrid).ToBeVisibleAsync();
+            await DetailsChildrenGridContextName.First.WaitForAsync();
+            var names = await DetailsChildrenGridContextName.AllInnerTextsAsync();
+            return names.Select(name => name.Trim()).ToList();
+        }
 
         public Task ExpectGridAutoTestContext1RowVisibleAsync(string expectedStatus) => Task.WhenAll(
             Expect(GridAutoTestContext1Name).ToBeVisibleAsync(),

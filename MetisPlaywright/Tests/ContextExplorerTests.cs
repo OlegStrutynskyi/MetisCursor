@@ -141,6 +141,11 @@ namespace MetisPlaywright.Tests
 
             var actualLabel = await contextExplorerPage.GetDetailsContextLabelTextAsync();
             actualLabel.Trim().Should().Be(Config.DefaultCoreLabel, "Details label is not correct.");
+
+            await contextExplorerPage.ExpectDetailsChildrenGridVisibleAsync();
+            var detailsChildNames = await contextExplorerPage.GetDetailsChildrenGridContextNamesAsync();
+            detailsChildNames.Should().Contain(Config.AutoTestsContext1Child1,
+                "Details children grid should include the pre-seeded child context.");
         }
 
         [Test]
