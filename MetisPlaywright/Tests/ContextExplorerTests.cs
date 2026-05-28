@@ -74,7 +74,7 @@ namespace MetisPlaywright.Tests
                 var builderPage = await contextExplorerPage.ClickCreateNewContextBtnAsync();
                 var contextSettingsPage = await builderPage.ClickCreateNewContextBtnAsync();
                 await contextSettingsPage.FillContextTitleAsync(expectedName);
-                await contextSettingsPage.FillContextDescriptionAsync("This is a Context created by an automated test.");
+                await contextSettingsPage.FillContextDescriptionAsync(Config.AutoTestsContext1Description);
                 await contextSettingsPage.SelectCustomerAccountRandomlyAsync();
                 await contextSettingsPage.ClickLabelsTabAsync();
                 await contextSettingsPage.SelectJobLabelAsync();

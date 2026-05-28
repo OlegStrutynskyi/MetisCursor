@@ -115,7 +115,7 @@ namespace MetisPlaywright.Tests
                 fillExtras: async page =>
                 {
                     await page.FillResourceSettingsVolumeAsync("111");
-                    await page.SelectUnitOfMeasureAsync("Foot");
+                    await page.SelectUnitOfMeasureAsync(Config.AutoTestsConsumableUnitOfMeasure);
                 });
         }
 
@@ -125,7 +125,7 @@ namespace MetisPlaywright.Tests
             await CreateResourceAndVerifyAsync(
                 name: "Autotests Asset 1",
                 type: "Asset",
-                fillExtras: page => page.SelectAssetTypeAsync("DONT DELETE Asset Type 1"));
+                fillExtras: page => page.SelectAssetTypeAsync(Config.AutoTestsAssetType1));
         }
 
         [Test]
@@ -225,7 +225,7 @@ namespace MetisPlaywright.Tests
         [Test]
         public async Task T19_ResourceManager_Archive_Unarchive_Resource()
         {
-            const string skill2Name = "DONT DELETE Skill 2 ARCHIVED";
+            const string skill2Name = Config.AutoTestsSkill2Archived;
             const string expectedEmptyMessage = "No resource records";
             const string expectedActiveStatus = "Active";
             const string expectedArchivedStatus = "Archived";
