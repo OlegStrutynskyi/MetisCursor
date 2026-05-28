@@ -113,6 +113,14 @@ namespace MetisPlaywright.Pages
         public Task ClickContextFieldsEditAsync() => ContextFieldsEditBtn.ClickAsync();
         public Task ClickValidationAsync() => ValidationBtn.ClickAsync();
 
+        public async Task<ContextSettingsPage> ClickCreateChildContextAndOpenContextSettingsAsync()
+        {
+            await ClickCreateChildContextAsync();
+            var contextSettingsPage = new ContextSettingsPage(Page);
+            await contextSettingsPage.ExpectContextSettingsModalVisibleAsync();
+            return contextSettingsPage;
+        }
+
         public async Task SelectStatusAsync(ContextStatus status)
         {
             await StatusDropdownArrow.ClickAsync();
@@ -127,6 +135,14 @@ namespace MetisPlaywright.Pages
 
         //expectations
         public Task ExpectOpenedAsync() => Expect(ContextOverviewTitle).ToBeVisibleAsync();
+        public Task ExpectContextNameAsync(string expectedContextName) =>
+            Expect(ContextName).ToHaveTextAsync(expectedContextName, new() { Timeout = 15_000 });
+
+        public Task ExpectChildContextVisibleInGridAsync(string childContextName) =>
+            Expect(ChildContextsGrid).ToContainTextAsync(childContextName, new() { Timeout = 15_000 });
+
+        public Task ClickChildContextInGridAsync(string childContextName) =>
+            ChildContextsGrid.GetByText(childContextName, new() { Exact = true }).ClickAsync();
 
         public Task ExpectDefaultControlsVisibleAsync() => Task.WhenAll(
             Expect(PathfinderBtn).ToBeVisibleAsync(),

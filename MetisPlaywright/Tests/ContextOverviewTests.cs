@@ -47,5 +47,45 @@ namespace MetisPlaywright.Tests
             var actualContextName = (await builderPage.GetNameTextAsync()).Trim();
             actualContextName.Should().Be(contextName, "Builder context name should match Context Overview name.");
         }
+
+        [Test]
+        public async Task T03_ContextOverview_CreateChildContext_Flow()
+        {
+            const string childContextName = "Context 1 Child 1";
+            const string expectedOverviewTitle = "Context Overview";
+            var contextRepository = new Neo4jRepository();
+
+            await contextRepository.DeleteContextByNameAsync(childContextName);
+
+            try
+            {
+                var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+                await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+                var contextSettingsPage = await contextOverviewPage.ClickCreateChildContextAndOpenContextSettingsAsync();
+
+                await contextSettingsPage.FillContextTitleAsync(childContextName);
+                await contextSettingsPage.ClickCreateAsync();
+                await contextOverviewPage.ExpectContextNameAsync(childContextName);
+
+                var leftMenuPage = new LeftMenuPage(Fixture.Page);
+                await leftMenuPage.ClickContextExplorerIconAsync();
+                var contextExplorerPage = new ContextExplorerPage(Fixture.Page);
+
+                await leftMenuPage.ClickContextExplorerIconAsync();
+                await contextExplorerPage.ClickGridAutoTestContext1NameAsync();
+                var parentOverviewPage = await contextExplorerPage.ClickDetailsOpenBtnAndOpenContextOverviewAsync();
+                var actualParentOverviewTitle = (await parentOverviewPage.GetContextOverviewTitleAsync()).Trim();
+                actualParentOverviewTitle.Should().Be(expectedOverviewTitle, "Parent Context Overview page title is not correct.");
+
+                var actualParentContextName = (await parentOverviewPage.GetContextNameAsync()).Trim();
+                actualParentContextName.Should().Be(Config.AutoTestsContext1, "Parent Context Overview name is not correct.");
+
+                await parentOverviewPage.ExpectChildContextVisibleInGridAsync(childContextName);
+            }
+            finally
+            {
+                await contextRepository.DeleteContextByNameAsync(childContextName);
+            }
+        }
     }
 }

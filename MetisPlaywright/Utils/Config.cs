@@ -41,6 +41,7 @@ namespace MetisPlaywright.Utils
         // Stable domain fixtures used by assertions (must not be deleted by cleanup jobs)
         public const string AutoTestsCustomer1 = "DONT DELETE Customer 1";
         public const string AutoTestsContext1 = "DONT DELETE Context 1";
+        public const string AutoTestsContext1Child1 = "DONT DELETE Context 1 Child 1";
         public const string AutoTestsContext1Description = "This is a Context created by an automated test.";
         public const string AutoTestsAssetType1 = "DONT DELETE Asset Type 1";
         public const string AutoTestsSkill1 = "DONT DELETE Skill 1";

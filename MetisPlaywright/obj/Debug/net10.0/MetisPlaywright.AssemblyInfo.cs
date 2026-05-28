@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MetisPlaywright")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f2ebf3a18c2a9d0bd7085e34340aea4ff7c9452")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e6cf492b3eb1677c8cd89ed720d41fb3fbf7449f")]
 [assembly: System.Reflection.AssemblyProductAttribute("MetisPlaywright")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MetisPlaywright")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

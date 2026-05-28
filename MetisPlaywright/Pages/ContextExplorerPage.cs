@@ -28,6 +28,8 @@ namespace MetisPlaywright.Pages
         private ILocator GridAutoTestContext1PathfinderBtn => Page.Locator($"{GridAutoTestContext1NameXPath}/ancestor::td/following-sibling::td[6]//button[@title='Open Pathfinder']");
         private ILocator GridAutoTestContext1OpenNeighborhoodBtn => Page.Locator($"{GridAutoTestContext1NameXPath}/ancestor::td/following-sibling::td[6]//button[@title='Open Neighborhood']");
         private ILocator GridAutoTestContext1ThreeDots => Page.Locator($"{GridAutoTestContext1NameXPath}/ancestor::td/following-sibling::td[6]//span[contains(@class,'e-more-vertical')]");
+        private ILocator GridContextNameByText(string contextName) =>
+            Page.Locator($"//tr/td[3]//span[contains(@class,'text-sm') and normalize-space()='{contextName}']");
 
         // Details section
         private ILocator DetailsEmptyMessage => Page.Locator("//div[contains(@class,'justify-center') and contains(@class,'border-gray-200')]");
@@ -148,6 +150,19 @@ namespace MetisPlaywright.Pages
         }
 
         public Task ClickGridAutoTestContext1NameAsync() => GridAutoTestContext1Name.ClickAsync();
+
+        public async Task ClickGridContextByNameAsync(string contextName)
+        {
+            var contextLocator = GridContextNameByText(contextName);
+            await Expect(contextLocator).ToBeVisibleAsync(new() { Timeout = 15_000 });
+            await contextLocator.ClickAsync();
+        }
+
+        public async Task<ContextOverviewPage> ClickGridContextByNameAndOpenContextOverviewAsync(string contextName)
+        {
+            await ClickGridContextByNameAsync(contextName);
+            return await ClickDetailsOpenBtnAndOpenContextOverviewAsync();
+        }
 
         public async Task<ContextOverviewPage> ClickDetailsOpenBtnAndOpenContextOverviewAsync()
         {

@@ -9,6 +9,14 @@
     {
       "AbsoluteMoniker": "D:0:0:{DC0FB0C1-F5E1-349B-3234-549A7F45AB69}|MetisPlaywright\\MetisPlaywright.csproj|d:\\cursor projects\\metisplaywright\\metisplaywright\\tests\\01_setup_data.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{DC0FB0C1-F5E1-349B-3234-549A7F45AB69}|MetisPlaywright\\MetisPlaywright.csproj|solutionrelative:metisplaywright\\tests\\01_setup_data.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC0FB0C1-F5E1-349B-3234-549A7F45AB69}|MetisPlaywright\\MetisPlaywright.csproj|d:\\cursor projects\\metisplaywright\\metisplaywright\\tests\\createcompanytests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC0FB0C1-F5E1-349B-3234-549A7F45AB69}|MetisPlaywright\\MetisPlaywright.csproj|solutionrelative:metisplaywright\\tests\\createcompanytests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC0FB0C1-F5E1-349B-3234-549A7F45AB69}|MetisPlaywright\\MetisPlaywright.csproj|d:\\cursor projects\\metisplaywright\\metisplaywright\\pages\\contextexplorerpage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC0FB0C1-F5E1-349B-3234-549A7F45AB69}|MetisPlaywright\\MetisPlaywright.csproj|solutionrelative:metisplaywright\\pages\\contextexplorerpage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,13 +50,39 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CreateCompanyTests.cs",
+              "DocumentMoniker": "D:\\Cursor Projects\\MetisPlaywright\\MetisPlaywright\\Tests\\CreateCompanyTests.cs",
+              "RelativeDocumentMoniker": "MetisPlaywright\\Tests\\CreateCompanyTests.cs",
+              "ToolTip": "D:\\Cursor Projects\\MetisPlaywright\\MetisPlaywright\\Tests\\CreateCompanyTests.cs",
+              "RelativeToolTip": "MetisPlaywright\\Tests\\CreateCompanyTests.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAQwD8AAACDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-28T09:06:40.591Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ContextExplorerPage.cs",
+              "DocumentMoniker": "D:\\Cursor Projects\\MetisPlaywright\\MetisPlaywright\\Pages\\ContextExplorerPage.cs",
+              "RelativeDocumentMoniker": "MetisPlaywright\\Pages\\ContextExplorerPage.cs",
+              "ToolTip": "D:\\Cursor Projects\\MetisPlaywright\\MetisPlaywright\\Pages\\ContextExplorerPage.cs",
+              "RelativeToolTip": "MetisPlaywright\\Pages\\ContextExplorerPage.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAAwCQAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-28T09:00:42.396Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
               "Title": "01_Setup_Data.cs",
               "DocumentMoniker": "D:\\Cursor Projects\\MetisPlaywright\\MetisPlaywright\\Tests\\01_Setup_Data.cs",
               "RelativeDocumentMoniker": "MetisPlaywright\\Tests\\01_Setup_Data.cs",
               "ToolTip": "D:\\Cursor Projects\\MetisPlaywright\\MetisPlaywright\\Tests\\01_Setup_Data.cs",
               "RelativeToolTip": "MetisPlaywright\\Tests\\01_Setup_Data.cs",
-              "ViewState": "AgIAALEAAAAAAAAAAAArwKgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAFcAAAAAAAAAAAAowGgAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-11T07:58:30.145Z",
               "EditorCaption": ""
@@ -61,7 +95,7 @@
               "RelativeDocumentMoniker": "MetisPlaywright\\Utils\\Config.cs",
               "ToolTip": "D:\\Cursor Projects\\MetisPlaywright\\MetisPlaywright\\Utils\\Config.cs",
               "RelativeToolTip": "MetisPlaywright\\Utils\\Config.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAABQAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-30T14:40:47.433Z",
               "EditorCaption": ""

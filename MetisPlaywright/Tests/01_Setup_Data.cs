@@ -20,6 +20,13 @@ namespace MetisPlaywright.Tests
             var expectedDashboardTitle = $"{Config.DefaultCoreLabel}s Dashboard";
 
             var createCompanyPage = new CreateCompanyPage(Fixture.Page);
+
+            //capture mailbox baseline before POST so we can detect the newly-arrived invitation
+            await Fixture.Page.GotoAsync(mailboxUrl);
+            await Fixture.Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+            var baselineSetupEmails = await createCompanyPage.GetSetupEmailCountAsync();
+            TestContext.Out.WriteLine($"Mailbox baseline: {baselineSetupEmails} 'Finish Setup' email(s) before POST /setup");
+
             //create new company and user via API
             var requestContext = await createCompanyPage.CreateRequestContextAsync();
             var response = await requestContext.PostAsync("setup", new APIRequestContextOptions
@@ -45,9 +52,12 @@ namespace MetisPlaywright.Tests
             var statusCode = response.Status;
             statusCode.Should().Be(202, "Creating a new company with valid data should return status code 202 Accepted.");
 
-            //navigate to mailbox and click on the link to set password for the new user
-            Thread.Sleep(5000); //wait for the email to arrive in the mailbox          
-            await Fixture.Page.GotoAsync(mailboxUrl);
+            //poll mailbox until a NEW invitation arrives 
+            await createCompanyPage.WaitForNewSetupEmailAsync(mailboxUrl, baselineSetupEmails, TimeSpan.FromMinutes(2));
+            var afterCount = await createCompanyPage.GetSetupEmailCountAsync();
+            TestContext.Out.WriteLine($"Mailbox after polling: {afterCount} 'Finish Setup' email(s) — taking the most recent");
+
+            //click on the link to set password for the new user
             await createCompanyPage.ClickFinishLinkAsync();
             var setupLink = await createCompanyPage.GetFinishSetupLinkAsync();
             await Fixture.Page.GotoAsync(setupLink);
@@ -68,7 +78,7 @@ namespace MetisPlaywright.Tests
             var actualDashboardTitle = await dashboardPage.GetDashboardTitleAsync();
             actualDashboardTitle.Should().Be(expectedDashboardTitle, "Logging in with correct credentials should navigate to the Dashboard page.");
 
-            //delete company and user from database
+            //delete company and user from database - commented out to preserve the setup data for future test runs; uncomment if you want to clean up the database after verifying the setup works
             //await new PostgresRepository().DeleteCompanyByAdminEmailAsync(Config.CorrectEmailAutoTests1);
             //await new Neo4jRepository().DeleteNodeByNameAsync(Config.CorrectEmailAutoTests1);
         }
@@ -90,7 +100,18 @@ namespace MetisPlaywright.Tests
             var mailboxUrl = $"https://app.endtest.io/mailbox?email={Config.CorrectEmailEmptyAutoTests1}";
             var expectedDashboardTitle = $"{Config.DefaultCoreLabel}s Dashboard";
 
+            //delete company and user from database if they already exist to ensure the setup can be run multiple times if needed
+            //await new PostgresRepository().DeleteCompanyByAdminEmailAsync(Config.CorrectEmailEmptyAutoTests1);
+            //await new Neo4jRepository().DeleteNodeByNameAsync(Config.CorrectEmailEmptyAutoTests1);
+
             var createCompanyPage = new CreateCompanyPage(Fixture.Page);
+
+            //capture mailbox baseline before POST so we can detect the newly-arrived invitation
+            await Fixture.Page.GotoAsync(mailboxUrl);
+            await Fixture.Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+            var baselineSetupEmails = await createCompanyPage.GetSetupEmailCountAsync();
+            TestContext.Out.WriteLine($"Mailbox baseline: {baselineSetupEmails} 'Finish Setup' email(s) before POST /setup");
+
             //create new company and user via API
             var requestContext = await createCompanyPage.CreateRequestContextAsync();
             var response = await requestContext.PostAsync("setup", new APIRequestContextOptions
@@ -116,9 +137,12 @@ namespace MetisPlaywright.Tests
             var statusCode = response.Status;
             statusCode.Should().Be(202, "Creating a new company with valid data should return status code 202 Accepted.");
 
-            //navigate to mailbox and click on the link to set password for the new user
-            Thread.Sleep(5000); //wait for the email to arrive in the mailbox          
-            await Fixture.Page.GotoAsync(mailboxUrl);
+            //poll mailbox until a NEW invitation arrives 
+            await createCompanyPage.WaitForNewSetupEmailAsync(mailboxUrl, baselineSetupEmails, TimeSpan.FromMinutes(2));
+            var afterCount = await createCompanyPage.GetSetupEmailCountAsync();
+            TestContext.Out.WriteLine($"Mailbox after polling: {afterCount} 'Finish Setup' email(s) — taking the most recent");
+
+            //click on the link to set password for the new user
             await createCompanyPage.ClickFinishLinkAsync();
             var setupLink = await createCompanyPage.GetFinishSetupLinkAsync();
             await Fixture.Page.GotoAsync(setupLink);
@@ -138,10 +162,6 @@ namespace MetisPlaywright.Tests
             var dashboardPage = new DashboardPage(Fixture.Page);
             var actualDashboardTitle = await dashboardPage.GetDashboardTitleAsync();
             actualDashboardTitle.Should().Be(expectedDashboardTitle, "Logging in with correct credentials should navigate to the Dashboard page.");
-
-            //delete company and user from database
-            //await new PostgresRepository().DeleteCompanyByAdminEmailAsync(Config.CorrectEmailEmptyAutoTests1);
-            //await new Neo4jRepository().DeleteNodeByNameAsync(Config.CorrectEmailEmptyAutoTests1);
         }
 
         [Test, Explicit("Run manually for one-time setup only.")]
@@ -323,6 +343,33 @@ namespace MetisPlaywright.Tests
 
             personNames.Should().Contain(n => string.Equals(n.Trim(), expectedPersonName, StringComparison.Ordinal),
                 "AutoTests2 person should appear in the People grid name list.");
+        }
+
+        [Test, Explicit("Run manually for one-time setup only. Creates child context for Context 1 and keeps it in tenant.")]
+        public async Task T15_Setup_CreateChildContext1()
+        {
+            var childContextName = Config.AutoTestsContext1Child1;
+            var contextRepository = new Neo4jRepository();
+            await contextRepository.DeleteContextByNameAsync(childContextName);
+
+            var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+            await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+            var contextSettingsPage = await contextOverviewPage.ClickCreateChildContextAndOpenContextSettingsAsync();
+
+            await contextSettingsPage.FillContextTitleAsync(childContextName);
+            await contextSettingsPage.ClickCreateAsync();
+            await contextOverviewPage.ExpectContextNameAsync(childContextName);
+
+            var leftMenuPage = new LeftMenuPage(Fixture.Page);
+            await leftMenuPage.ClickContextExplorerIconAsync();
+            var contextExplorerPage = new ContextExplorerPage(Fixture.Page);
+            await contextExplorerPage.ClickGridAutoTestContext1NameAsync();
+
+            var parentOverviewPage = await contextExplorerPage.ClickDetailsOpenBtnAndOpenContextOverviewAsync();
+            var actualParentContextName = (await parentOverviewPage.GetContextNameAsync()).Trim();
+            actualParentContextName.Should().Be(Config.AutoTestsContext1, "Parent Context Overview name is not correct.");
+
+            await parentOverviewPage.ExpectChildContextVisibleInGridAsync(childContextName);
         }
 
 
