@@ -28,6 +28,7 @@ namespace MetisPlaywright.Pages
         private ILocator GridAutoTestContext1PathfinderBtn => Page.Locator($"{GridAutoTestContext1NameXPath}/ancestor::td/following-sibling::td[6]//button[@title='Open Pathfinder']");
         private ILocator GridAutoTestContext1OpenNeighborhoodBtn => Page.Locator($"{GridAutoTestContext1NameXPath}/ancestor::td/following-sibling::td[6]//button[@title='Open Neighborhood']");
         private ILocator GridAutoTestContext1ThreeDots => Page.Locator($"{GridAutoTestContext1NameXPath}/ancestor::td/following-sibling::td[6]//span[contains(@class,'e-more-vertical')]");
+        private ILocator GridAutoTestContext1Arrow => Page.Locator($"{GridAutoTestContext1NameXPath}/ancestor::span/preceding-sibling::span[contains(@class,'e-treegrid')]");
         private ILocator GridContextNameByText(string contextName) =>
             Page.Locator($"//tr/td[3]//span[contains(@class,'text-sm') and normalize-space()='{contextName}']");
 
@@ -150,6 +151,13 @@ namespace MetisPlaywright.Pages
         }
 
         public Task ClickGridAutoTestContext1NameAsync() => GridAutoTestContext1Name.ClickAsync();
+        public Task ClickGridAutoTestContext1ArrowAsync() => GridAutoTestContext1Arrow.ClickAsync();
+
+        public Task ExpectContextVisibleInGridAsync(string contextName) =>
+            Expect(GridContextNameByText(contextName)).ToBeVisibleAsync(new() { Timeout = 15_000 });
+
+        public Task ExpectContextHiddenInGridAsync(string contextName) =>
+            Expect(GridContextNameByText(contextName)).ToBeHiddenAsync(new() { Timeout = 15_000 });
 
         public async Task ClickGridContextByNameAsync(string contextName)
         {

@@ -139,6 +139,12 @@ namespace MetisPlaywright.Pages
             return contextOverviewPage;
         }
 
+        public Task ExpectContextVisibleInGridAsync(string contextName) =>
+            Expect(GridContextRow(contextName)).ToBeVisibleAsync(new() { Timeout = 15_000 });
+
+        public Task ExpectContextHiddenInGridAsync(string contextName) =>
+            Expect(GridContextRow(contextName)).ToBeHiddenAsync(new() { Timeout = 15_000 });
+
         public async Task ExpectDefaultControlsVisibleAsync()
         {
             await Expect(TotalCounter).ToBeVisibleAsync();

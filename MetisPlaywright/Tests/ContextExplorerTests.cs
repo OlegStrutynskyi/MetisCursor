@@ -95,7 +95,23 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T06_ContextExplorer_Grid_AutoTestContext1_View()
+        public async Task T06_ContextExplorer_ShowChildContext1()
+        {
+            var contextExplorerPage = new ContextExplorerPage(Fixture.Page);
+            await contextExplorerPage.OpenForAutoTests1Async();
+            await contextExplorerPage.GetGridRecordsCountAsync();
+
+            await contextExplorerPage.ExpectContextHiddenInGridAsync(Config.AutoTestsContext1Child1);
+
+            await contextExplorerPage.ClickGridAutoTestContext1ArrowAsync();
+            await contextExplorerPage.ExpectContextVisibleInGridAsync(Config.AutoTestsContext1Child1);
+
+            await contextExplorerPage.ClickGridAutoTestContext1ArrowAsync();
+            await contextExplorerPage.ExpectContextHiddenInGridAsync(Config.AutoTestsContext1Child1);
+        }
+
+        [Test]
+        public async Task T07_ContextExplorer_Grid_AutoTestContext1_View()
         {
             const string expectedStatus = "Draft";
 
@@ -106,7 +122,7 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T07_ContextExplorer_Details_Context1()
+        public async Task T08_ContextExplorer_Details_Context1()
         {
             var contextExplorerPage = new ContextExplorerPage(Fixture.Page);
             await contextExplorerPage.OpenForAutoTests1Async();
@@ -128,7 +144,7 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T08_ContextExplorer_Details_ClickOpen()
+        public async Task T09_ContextExplorer_Details_ClickOpen()
         {
             const string expectedOverviewTitle = "Context Overview";
 
@@ -149,7 +165,7 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T09_ContextExplorer_Details_ClickAddChild()
+        public async Task T10_ContextExplorer_Details_ClickAddChild()
         {
             const string expectedBuilderTitle = "Builder";
 
@@ -170,7 +186,7 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T10_ContextExplorer_Details_ClickAddDependency()
+        public async Task T11_ContextExplorer_Details_ClickAddDependency()
         {
             const string expectedModalTitle = "Add Dependency";
 

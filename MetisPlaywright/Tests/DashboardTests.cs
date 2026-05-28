@@ -62,7 +62,22 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T04_Dashboard_ClickContext1()
+        public async Task T04_Dashboard_ClickShowChildren()
+        {
+            var dashboardPage = new DashboardPage(Fixture.Page);
+            await dashboardPage.OpenForAutoTests1Async();
+
+            await dashboardPage.ExpectContextHiddenInGridAsync(Config.AutoTestsContext1Child1);
+
+            await dashboardPage.ClickShowChildrenBtnAsync();
+            await dashboardPage.ExpectContextVisibleInGridAsync(Config.AutoTestsContext1Child1);
+
+            await dashboardPage.ClickShowChildrenBtnAsync();
+            await dashboardPage.ExpectContextHiddenInGridAsync(Config.AutoTestsContext1Child1);
+        }
+
+        [Test]
+        public async Task T05_Dashboard_ClickContext1()
         {
             const string expectedOverviewTitle = "Context Overview";
 
