@@ -27,7 +27,7 @@ namespace MetisPlaywright.Pages
             var dashboardPage = new DashboardPage(Page);
             await dashboardPage.OpenForEmptyTenantAsync();
             //sidebar items render slightly after the dashboard title; short non-blocking wait avoids flake on first click
-            await Page.WaitForTimeoutAsync(1000);
+            await Page.WaitForTimeoutAsync(2000);
         }
 
         public async Task OpenForAutoTests1Async()

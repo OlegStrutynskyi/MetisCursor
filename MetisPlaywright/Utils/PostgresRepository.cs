@@ -6,7 +6,6 @@ namespace MetisPlaywright.Utils
     {
         public Task DeleteCompanyByAdminEmailAsync(string adminEmail)
         {
-            // A single command keeps dependent rows and the company/user cleanup together.
             const string sql = """
                 DELETE FROM public."Chats"                       WHERE "CompanyId" = (SELECT "CompanyId" FROM public."Companies" WHERE "SystemAdminEmail" = @email);
                 DELETE FROM public."Files"                       WHERE "CompanyId" = (SELECT "CompanyId" FROM public."Companies" WHERE "SystemAdminEmail" = @email);

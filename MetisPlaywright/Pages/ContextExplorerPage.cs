@@ -75,7 +75,7 @@ namespace MetisPlaywright.Pages
         {
             await CreateNewContextBtn.ClickAsync();
             var builderPage = new BuilderPage(Page);
-            await builderPage.ExpectDefaultControlsVisibleAsync();
+            await Expect(builderPage.GetPageTitleLocator()).ToContainTextAsync("Builder");
             return builderPage;
         }
 
