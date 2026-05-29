@@ -28,7 +28,22 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T02_ContextOverview_ClickOpenContextBuilder()
+        public async Task T02_ContextOverview_ClickQRCode()
+        {
+            const string expectedModalTitle = "Context QR code";
+
+            var contextOverviewPage = new ContextOverviewPage(Fixture.Page);
+            await contextOverviewPage.OpenForContextAsync(Config.AutoTestsContext1);
+
+            await contextOverviewPage.ClickQRCodeBtnAsync();
+            await contextOverviewPage.ExpectQRCodeModalVisibleAsync(expectedModalTitle);
+
+            var actualModalTitle = (await contextOverviewPage.GetQRCodeModalTitleTextAsync()).Trim();
+            actualModalTitle.Should().Be(expectedModalTitle, "QR code modal title is not correct.");
+        }
+
+        [Test]
+        public async Task T03_ContextOverview_ClickOpenContextBuilder()
         {
             const string expectedBuilderTitle = "Builder";
 
@@ -49,7 +64,7 @@ namespace MetisPlaywright.Tests
         }
 
         [Test]
-        public async Task T03_ContextOverview_CreateChildContext_Flow()
+        public async Task T04_ContextOverview_CreateChildContext_Flow()
         {
             const string childContextName = "Context 1 Child 1";
             const string expectedOverviewTitle = "Context Overview";

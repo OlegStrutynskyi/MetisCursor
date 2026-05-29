@@ -91,7 +91,6 @@ namespace MetisPlaywright.Tests
 
             //Activate optimization for the company via database update
             await ActivateOptimizationForAutoTestsCompany(companyUUID);
-
         }
 
         [Test, Explicit("Run manually for one-time setup only.")]

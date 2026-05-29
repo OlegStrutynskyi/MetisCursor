@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MetisPlaywright")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+01834deef7336494b12f65ff22ffd1a3ee3567f8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+73abdc524e41d8a774c6a2ef25275aa2173aa9c7")]
 [assembly: System.Reflection.AssemblyProductAttribute("MetisPlaywright")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MetisPlaywright")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

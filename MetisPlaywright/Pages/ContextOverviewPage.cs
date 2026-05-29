@@ -53,6 +53,13 @@ namespace MetisPlaywright.Pages
         private ILocator ContextFieldsEmptyText => Page.Locator("//h2[normalize-space()='Context Fields']/../following-sibling::div//p/strong");
         private ILocator ValidationBtn => Page.Locator("//button[contains(@class,'bottom')]");
 
+        //QR code modal
+        private ILocator QRCodeModal => Page.Locator("//div[@class='e-tip-content']");
+        private ILocator QRCodeModalTitle => Page.Locator("//div[@class='e-tip-content']//div[contains(@class,'popup-header-title')]/div");
+        private ILocator QRCodeModalCloseIcon => Page.Locator("//div[@class='e-tip-content']//a[contains(@class,'popup-close-btn')]");
+        private ILocator QRCodeImage => Page.Locator("//div[@class='e-tip-content']//div[@class='popup-body ']/div[@data-role='qrcode']");
+        private ILocator QRCodeModalDownloadBtn => Page.Locator("//div[@class='e-tip-content']//button[normalize-space()='Download QR code']");
+
         private ILocator StatusDropdownOption(ContextStatus status) =>
             Page.Locator($"//li[@data-value='{status}']");
 
@@ -98,7 +105,7 @@ namespace MetisPlaywright.Pages
         public Task ClickOptimizeAsync() => OptimizeBtn.ClickAsync();
         public Task ClickDuplicateAsync() => DuplicateBtn.ClickAsync();
         public Task ClickPrintViewToggleAsync() => PrintViewToggle.ClickAsync();
-        public Task ClickQRCodeAsync() => QRCodeBtn.ClickAsync();
+        public Task ClickQRCodeBtnAsync() => QRCodeBtn.ClickAsync();
         public Task ClickOpenContextBuilderAsync() => OpenContextBuilderBtn.ClickAsync();
         public Task ClickOverviewTabAsync() => OverviewTab.ClickAsync();
         public Task ClickRequirementsTabAsync() => RequirementsTab.ClickAsync();
@@ -140,6 +147,18 @@ namespace MetisPlaywright.Pages
 
         public Task ExpectChildContextVisibleInGridAsync(string childContextName) =>
             Expect(ChildContextsGrid).ToContainTextAsync(childContextName, new() { Timeout = 15_000 });
+
+        public async Task<string> GetQRCodeModalTitleTextAsync()
+        {
+            await Expect(QRCodeModal).ToBeVisibleAsync();
+            return (await QRCodeModalTitle.TextContentAsync()) ?? string.Empty;
+        }
+
+        public Task ExpectQRCodeModalVisibleAsync(string expectedTitle) => Task.WhenAll(
+            Expect(QRCodeModal).ToBeVisibleAsync(),
+            Expect(QRCodeModalTitle).ToHaveTextAsync(expectedTitle),
+            Expect(QRCodeImage).ToBeVisibleAsync(),
+            Expect(QRCodeModalDownloadBtn).ToBeVisibleAsync());
 
         public Task ClickChildContextInGridAsync(string childContextName) =>
             ChildContextsGrid.GetByText(childContextName, new() { Exact = true }).ClickAsync();
